@@ -7,7 +7,7 @@ The framework supports "Random Games", "Jurdzinski Games", "Clique Games",
 
 Download
 ---------
-- Source Files can be downloaded through GitHub
+- Source Files can be downloaded [here](https://github.com/vinceprignano/SPGSolver/archive/master.zip)
 - Executable Jar can be found [here]()
 
 Requirements
