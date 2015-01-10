@@ -12,6 +12,9 @@ A collection of tools written in multiple programming languages to solve parity 
 A parity game. Circular nodes belong to player 0, rectangular nodes belong to player 1.
 On the left side is the winning region of player 0, on the right side is the winning region of player 1.
 
+###### Comparison
+
+
 License
 ---------
 
