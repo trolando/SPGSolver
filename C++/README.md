@@ -1,4 +1,4 @@
-C++ Parity Games Solver
+CPPSolver
 =========
 
 An application framework written in C++ for solving Parity Games. The framework supports "Random Games".

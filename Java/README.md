@@ -1,4 +1,4 @@
-Java Parity Games Solver
+JPGSolver
 =========
 
 An application framework written in Java for solving Parity Games. The framework supports "Random Games".
