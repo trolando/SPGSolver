@@ -13,7 +13,7 @@ A parity game. Circular nodes belong to player 0, rectangular nodes belong to pl
 On the left side is the winning region of player 0, on the right side is the winning region of player 1.
 
 ###### Comparison
-
+![](https://raw.githubusercontent.com/vinceprignano/SPGSolver/master/comparison.png)
 
 License
 ---------
