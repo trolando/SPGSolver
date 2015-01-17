@@ -6,12 +6,8 @@ An application framework written in Java for solving Parity Games. The framework
 Requirements
 ---------
 - Java 8
-
-Running SPGSolver
----------
-```
-java -jar
-```
+- Trove Library
+- Google Guava
 
 License
 ---------
