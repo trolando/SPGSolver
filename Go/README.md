@@ -16,7 +16,7 @@ go build GPGSolver
 Running GPGSolver
 ---------
 ```
-./GPGSolver
+./GPGSolver <filepath>
 ```
 
 License
