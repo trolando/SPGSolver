@@ -10,7 +10,8 @@ Requirements
 Building GPGSolver
 ---------
 ```
-go build GPGSolver
+go get -v
+go build GPGSolver.go
 ```
 
 Running GPGSolver
