@@ -10,8 +10,9 @@ Requirements
 
 Running SPGSolver
 ---------
+After compiling with `g++` or `clang`.
 ```
-java -jar
+./CPPSolver <filepath>
 ```
 
 License
