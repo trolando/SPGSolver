@@ -13,7 +13,7 @@ Building GPGSolver
 go build GPGSolver
 ```
 
-Building GPGSolver
+Running GPGSolver
 ---------
 ```
 ./GPGSolver
