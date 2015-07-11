@@ -3,17 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"graphs"
 	"os"
-	"runtime"
-	"runtime/pprof"
-	"solvers"
 	"sort"
+
+	"github.com/vinceprignano/SPGSolver/Go/graphs"
+	"github.com/vinceprignano/SPGSolver/Go/solvers"
 )
 
 func main() {
-	// Utils settings at runtime
-	runtime.GOMAXPROCS((runtime.NumCPU() * 2))
 
 	// Flags for command line
 	justHeatFlag := flag.Bool("justheat", false, "Pass this option to disable solution printing.")
@@ -33,10 +30,6 @@ func main() {
 
 	// Declaring two solutions slices of integers
 	var solution0, solution1 []int
-
-	f, _ := os.Create("test.cpuprofile")
-	pprof.StartCPUProfile(f)
-	defer pprof.StopCPUProfile()
 
 	// Starting solving process, using Recursive Improved as default method
 	// Solving the game using the Recursive Improved Algorithm

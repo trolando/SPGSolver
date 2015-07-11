@@ -9,7 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"utils"
+
+	"github.com/vinceprignano/SPGSolver/Go/utils"
 )
 
 // Node struct keeps track of adjacent and incident lists.

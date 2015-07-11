@@ -1,9 +1,10 @@
 package solvers
 
 import (
-	"graphs"
 	"time"
-	"utils"
+
+	"github.com/vinceprignano/SPGSolver/Go/graphs"
+	"github.com/vinceprignano/SPGSolver/Go/utils"
 )
 
 // Solver interface defines only a Win function

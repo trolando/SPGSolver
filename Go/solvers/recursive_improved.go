@@ -1,6 +1,6 @@
 package solvers
 
-import "graphs"
+import "github.com/vinceprignano/SPGSolver/Go/graphs"
 
 type RecursiveImproved struct{}
 
