@@ -40,5 +40,36 @@ public class App {
             }
             System.out.println();
         }
+
+        for (int d = 0; d < 1; d++) {
+            Solver solver = new ImprovedRecursiveSolver();
+            Stopwatch sw2 = Stopwatch.createStarted();
+            int[][] solution = solver.win(G);
+            sw2.stop();
+            System.out.println("Improved Solved in " + sw2);
+            Arrays.sort(solution[0]);
+            Arrays.sort(solution[1]);
+            System.out.print("\nSolution for player 0:\n{");
+            int index = 0;
+            for (int x : solution[0]) {
+                if (index == solution[0].length) {
+                    System.out.printf(x + "}");
+                } else {
+                    System.out.printf(x + ", ");
+                }
+                index += 1;
+            }
+            System.out.print("\nSolution for player 1:\n{");
+            index = 0;
+            for (int x : solution[1]) {
+                if (index == solution[1].length) {
+                    System.out.printf(x + "}");
+                } else {
+                    System.out.printf(x + ", ");
+                }
+                index += 1;
+            }
+            System.out.println();
+        }
     }
 }
