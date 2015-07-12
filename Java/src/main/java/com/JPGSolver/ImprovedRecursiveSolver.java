@@ -74,7 +74,7 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
         if (threads == null){
             int cores = Runtime.getRuntime().availableProcessors();
             threads = new ArrayList<>(cores);
-            jobs = new ArrayBlockingQueue<>(cores);
+            jobs = new ArrayBlockingQueue<>(cores*2);
 
             for (int i =0 ; i < cores; i++) threads.add(new Thread(){
                 public void run(){
@@ -117,6 +117,8 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
                 W[j] = Ints.concat(W1[j], B.toArray());
             }
         }
+        threads.stream().forEach(Thread::interrupt);
+        threads = null;
         return W;
     }
 
