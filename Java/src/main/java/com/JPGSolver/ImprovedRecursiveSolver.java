@@ -43,7 +43,7 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
                 boolean flag = G.getPlayerOf(v0) == i;
                 if (tmpMap[v0] == 0) {
                     if (flag) {
-                        A.add(v0); //azz
+                        synchronized (A){ A.add(v0);}  //azz
                         tmpMap[v0] = 1;
                     } else {
                         int adjCounter = 0;
@@ -55,13 +55,13 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
                         }
                         tmpMap[v0] = adjCounter;
                         if (adjCounter == 1) {
-                            A.add(v0); //azz
+                            synchronized (A){ A.add(v0);} //azz
                         }
                     }
                 } else if (!flag && tmpMap[v0] > 1) {
                     tmpMap[v0] -= 1;
                     if (tmpMap[v0] == 1) {
-                        A.add(v0); //azz
+                        synchronized (A){ A.add(v0);} //azz
                     }
                 }
             }
