@@ -90,6 +90,36 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
         }
     }
 
+    @Override
+    public int[][] win(Graph G) {
+        BitSet removed = new BitSet(G.length());
+        return win_improved(G, removed);
+    }
+
+    private int[][] win_improved(Graph G, BitSet removed) {
+        final int[][] W = {new int[0], new int[0]};
+        final int d = G.maxPriority(removed);
+        if (d > -1) {
+            TIntArrayList U = G.getNodesWithPriority(d, removed);
+            final int p = d % 2;
+            final int j = 1 - p;
+            int[][] W1;
+            BitSet removed1 = (BitSet)removed.clone();
+            final TIntArrayList A = Attr(G, U, p, removed1);
+            W1 = win_improved(G, removed1);
+            if (W1[j].length == 0) {
+                W[p] = Ints.concat(W1[p], A.toArray());
+            } else {
+                BitSet removed2 = (BitSet)removed.clone();
+                final TIntArrayList B = Attr(G, new TIntArrayList(W1[j]), j, removed2);
+                W1 = win_improved(G, removed2);
+                W[p] = W1[p];
+                W[j] = Ints.concat(W1[j], B.toArray());
+            }
+        }
+        return W;
+    }
+
     private TIntArrayList Attr(Graph G, TIntArrayList A, int i, BitSet removed) {
         final int[] tmpMap = new int[G.length()];
         TIntIterator it = A.iterator();
