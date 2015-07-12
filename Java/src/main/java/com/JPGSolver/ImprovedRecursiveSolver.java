@@ -1,4 +1,4 @@
-package com.JSPSolver;
+package com.JPGSolver;
 
 import com.google.common.primitives.Ints;
 import gnu.trove.iterator.TIntIterator;
@@ -8,7 +8,6 @@ import java.lang.Thread;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import java.util.stream.IntStream;
 
@@ -16,22 +15,25 @@ import java.util.stream.IntStream;
 public class ImprovedRecursiveSolver extends RecursiveSolver {
 
     private static ArrayList<Thread> threads;
-    //private static LinkedBlockingQueue<Job> jobs;
-    private static ArrayBlockingQueue<Job> jobs:
+    private static ArrayBlockingQueue<Job> jobs;
 
     private class Job {
 
-        int v0;
-        final int[] tmpMap;
-        Graph G;
-        TIntArrayList A;
-        BitSet removed;
+        private int i;
+        private int v0;
+        private final int[] tmpMap;
+        private Graph G;
+        private TIntArrayList A;
+        private TIntIterator it;
+        private BitSet removed;
 
-        public Job(int v0, final int[] tmpMap, Graph G, TIntArrayList A, BitSet removed){
+        public Job(int i, int v0, final int[] tmpMap, Graph G, TIntArrayList A, TIntIterator it, BitSet removed) throws InterruptedException{
+            this.i = i;
             this.v0 = v0;
             this.tmpMap = tmpMap;
             this.G = G;
             this.A = A;
+            this.it = it;
             this.removed = removed;
             jobs.put(this);
         }
@@ -69,25 +71,25 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
     }
 
     public ImprovedRecursiveSolver(){
-        if (workers == NULL){
+        if (threads == null){
             int cores = Runtime.getRuntime().availableProcessors();
-            workers = new ArrayList<Thread>(cores);
-            jobs = new ArrayBlockingQueue<Job>(cores);
+            threads = new ArrayList<>(cores);
+            jobs = new ArrayBlockingQueue<>(cores);
 
-            //for (int i =0 <; i < cores; i++) workers.add(new Thread(new Worker()));
-            for (int i =0 <; i < cores; i++) threads.add(new Thread(){
+            for (int i =0 ; i < cores; i++) threads.add(new Thread(){
                 public void run(){
-                    while(!Thread.currentThread().isInterrupted())
-                        jobs.take().execute();
+                    try {
+                        while (!Thread.currentThread().isInterrupted())
+                            jobs.take().execute();
+                    } catch(InterruptedException e){
+                        throw new RuntimeException("Thread InterruptedException");
+                    }
                 }
             });
-            for (Thread t : threads){
-                t.start();
-            }
+            threads.stream().forEach(Thread::start);
         }
     }
 
-    @Override
     private TIntArrayList Attr(Graph G, TIntArrayList A, int i, BitSet removed) {
         final int[] tmpMap = new int[G.length()];
         TIntIterator it = A.iterator();
@@ -97,13 +99,17 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
         int index = 0;
         while (index < A.size()) {
             final TIntIterator iter = G.incomingEdgesOf(A.get(index)).iterator();
-            while(iter.hasNext()) {
-                int v0 = iter.next();
-                //jobs fai
-                jobs.add(new Job(v0, tmpMap, G, A, removed));
+            try {
+                while (iter.hasNext()) {
+                    int v0 = iter.next();
+                    //jobs fai
+                    jobs.add(new Job(i, v0, tmpMap, G, A, it, removed));
+                }
+                index += 1;
+                while (jobs.size() != 0) ;
+            } catch (InterruptedException e){
+                throw new RuntimeException("Attr InterruptedException");
             }
-            index += 1;
-            while (jobs.size() != 0);
         }
         IntStream.of(A.toArray()).forEach(removed::flip);
         return A;
