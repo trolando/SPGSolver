@@ -81,6 +81,7 @@ public class Graph {
 
     public int maxPriority(BitSet removed) {
         Optional<Node> maxNode = Stream.of(info)
+                .parallel()
                 .filter(x -> !removed.get(x.getIndex()))
                 .max((x, y) -> Integer.compare(x.getPriority(), y.getPriority()));
         return maxNode.isPresent() ? maxNode.get().getPriority() : -1;
@@ -89,7 +90,6 @@ public class Graph {
     public TIntArrayList getNodesWithPriority(final int priority, BitSet removed) {
         final TIntArrayList res = new TIntArrayList();
         Stream.of(info)
-                .parallel()
                 .filter(x -> !removed.get(x.getIndex()) && x.getPriority() == priority)
                 .forEach(x -> res.add(x.getIndex()));
         return res;
@@ -115,6 +115,7 @@ public class Graph {
             } else {
                 throw new RuntimeException("Invalid file passed as arena.");
             }
+
             final Graph G = graph;
             br.lines().parallel().forEach(line -> {
                 String[] x = line.split(" ");
@@ -123,6 +124,7 @@ public class Graph {
                 G.info[node].setIndex(node);
                 G.info[node].setPriority(Integer.parseInt(x[1]));
                 G.info[node].setPlayer(Integer.parseInt(x[2]));
+
                 for (String edge : edges) {
                     if (edge.endsWith(";")) {
                         G.addEdge(node, Integer.parseInt(edge.substring(0, edge.length() - 1)));
@@ -131,6 +133,7 @@ public class Graph {
                     }
                 }
             });
+
         } catch (FileNotFoundException e) {
             System.out.println("File not found, please check your input.");
         }

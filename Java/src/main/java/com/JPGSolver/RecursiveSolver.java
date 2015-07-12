@@ -54,7 +54,11 @@ public class RecursiveSolver implements Solver {
             }
             index += 1;
         }
-        IntStream.of(A.toArray()).forEach(removed::flip);
+
+        it = A.iterator();
+        while (it.hasNext()) {
+            removed.set(it.next());
+        }
         return A;
     }
 
