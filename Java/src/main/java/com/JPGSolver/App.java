@@ -20,7 +20,7 @@ public class App {
         System.out.print("\nSolution for player 0:\n{");
         int index = 0;
         for (int x : solution[0]) {
-            if (index == solution[0].length) {
+            if (index == solution[0].length-1) {
                 System.out.printf(x + "}");
             } else {
                 System.out.printf(x + ", ");
@@ -30,7 +30,7 @@ public class App {
         System.out.print("\nSolution for player 1:\n{");
         index = 0;
         for (int x : solution[1]) {
-            if (index == solution[1].length) {
+            if (index == solution[1].length-1) {
                 System.out.printf(x + "}");
             } else {
                 System.out.printf(x + ", ");
