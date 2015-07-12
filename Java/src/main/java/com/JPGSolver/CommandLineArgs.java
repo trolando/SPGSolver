@@ -27,4 +27,7 @@ public class CommandLineArgs {
 
     @Parameter(description = "Path to graph file")
     public List<String> files = new ArrayList<String>();
+
+    @Parameter(names = "-parallel", description = "Parallelized Attractor")
+    public boolean parallel = false;
 }

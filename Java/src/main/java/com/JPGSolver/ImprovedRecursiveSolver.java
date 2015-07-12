@@ -16,7 +16,6 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
 
     private static ArrayList<Thread> threads;
     private static ArrayBlockingQueue<Job> jobs;
-    private static int addsync;
 
     private class Job {
 
