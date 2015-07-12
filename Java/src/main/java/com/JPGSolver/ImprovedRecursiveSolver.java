@@ -16,6 +16,7 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
 
     private static ArrayList<Thread> threads;
     private static ArrayBlockingQueue<Job> jobs;
+    private static int addsync;
 
     private class Job {
 
@@ -24,16 +25,14 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
         private final int[] tmpMap;
         private Graph G;
         private TIntArrayList A;
-        private TIntIterator it;
         private BitSet removed;
 
-        public Job(int i, int v0, final int[] tmpMap, Graph G, TIntArrayList A, TIntIterator it, BitSet removed) throws InterruptedException{
+        public Job(int i, int v0, final int[] tmpMap, Graph G, TIntArrayList A, BitSet removed) throws InterruptedException{
             this.i = i;
             this.v0 = v0;
             this.tmpMap = tmpMap;
             this.G = G;
             this.A = A;
-            this.it = it;
             this.removed = removed;
             jobs.put(this);
         }
@@ -47,7 +46,7 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
                         tmpMap[v0] = 1;
                     } else {
                         int adjCounter = 0;
-                        it = G.outgoingEdgesOf(v0).iterator();
+                        TIntIterator it = G.outgoingEdgesOf(v0).iterator();
                         while (it.hasNext()) {
                             if (!removed.get(it.next())) {
                                 adjCounter += 1;
@@ -135,7 +134,7 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
                 while (iter.hasNext()) {
                     int v0 = iter.next();
                     //jobs fai
-                    jobs.put(new Job(i, v0, tmpMap, G, A, it, removed));
+                    jobs.put(new Job(i, v0, tmpMap, G, A, removed));
                 }
                 index += 1;
                 while (jobs.size() != 0) ;
