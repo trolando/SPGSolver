@@ -1,5 +1,7 @@
 package com.JPGSolver;
+
 import gnu.trove.list.array.TIntArrayList;
+
 import java.io.*;
 import java.util.BitSet;
 import java.util.Optional;

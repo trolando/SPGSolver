@@ -1,8 +1,8 @@
 package com.JPGSolver;
 
 import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
 import com.google.common.base.Stopwatch;
+
 import java.util.Arrays;
 
 public class App {
