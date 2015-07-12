@@ -1,5 +1,7 @@
 package com.JPGSolver;
+
 import gnu.trove.list.array.TIntArrayList;
+
 import java.io.*;
 import java.util.BitSet;
 import java.util.Optional;
@@ -70,33 +72,36 @@ public class Graph {
         return info.length;
     }
 
-    public int getPlayerOf(int v) {
+    public int getPlayerOf(final int v) {
         return info[v].getPlayer();
     }
 
-    public void addEdge(int origin, int destination) {
+    public void addEdge(final int origin, final int destination) {
         info[origin].addAdj(destination);
         info[destination].addInj(origin);
     }
 
     public int maxPriority(BitSet removed) {
-        Optional<Node> maxNode = Stream.of(info).filter(x -> !removed.get(x.getIndex()))
+        Optional<Node> maxNode = Stream.of(info)
+                .parallel()
+                .filter(x -> !removed.get(x.getIndex()))
                 .max((x, y) -> Integer.compare(x.getPriority(), y.getPriority()));
         return maxNode.isPresent() ? maxNode.get().getPriority() : -1;
     }
 
     public TIntArrayList getNodesWithPriority(final int priority, BitSet removed) {
         final TIntArrayList res = new TIntArrayList();
-        Stream.of(info).parallel().filter(x -> !removed.get(x.getIndex()) && x.getPriority() == priority)
+        Stream.of(info)
+                .filter(x -> !removed.get(x.getIndex()) && x.getPriority() == priority)
                 .forEach(x -> res.add(x.getIndex()));
         return res;
     }
 
-    public TIntArrayList incomingEdgesOf(int v) {
+    public TIntArrayList incomingEdgesOf(final int v) {
         return info[v].getInj();
     }
 
-    public TIntArrayList outgoingEdgesOf(int v) {
+    public TIntArrayList outgoingEdgesOf(final int v) {
         return info[v].getAdj();
     }
 
@@ -112,14 +117,16 @@ public class Graph {
             } else {
                 throw new RuntimeException("Invalid file passed as arena.");
             }
+
             final Graph G = graph;
-            br.lines().forEach(line -> {
+            br.lines().parallel().forEach(line -> {
                 String[] x = line.split(" ");
                 String[] edges = x[3].split(",");
                 int node = Integer.parseInt(x[0]);
                 G.info[node].setIndex(node);
                 G.info[node].setPriority(Integer.parseInt(x[1]));
                 G.info[node].setPlayer(Integer.parseInt(x[2]));
+
                 for (String edge : edges) {
                     if (edge.endsWith(";")) {
                         G.addEdge(node, Integer.parseInt(edge.substring(0, edge.length() - 1)));
@@ -128,6 +135,7 @@ public class Graph {
                     }
                 }
             });
+
         } catch (FileNotFoundException e) {
             System.out.println("File not found, please check your input.");
         }
