@@ -133,7 +133,7 @@ public class ImprovedRecursiveSolver extends RecursiveSolver {
                 while (iter.hasNext()) {
                     int v0 = iter.next();
                     //jobs fai
-                    jobs.add(new Job(i, v0, tmpMap, G, A, it, removed));
+                    jobs.put(new Job(i, v0, tmpMap, G, A, it, removed));
                 }
                 index += 1;
                 while (jobs.size() != 0) ;
