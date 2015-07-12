@@ -6,22 +6,22 @@ type RecursiveImproved struct{}
 
 // attr is the attractor function used by 'win'
 func attr(G *graphs.Graph, removed []bool, A []int, i int) []int {
-	tmpMap := make([]int, len(G.Nodes()))
+	tmpMap := make([]int, len(G.Nodes))
 	for _, x := range A {
 		tmpMap[x] = 1
 	}
 	index := 0
 	for {
-		for _, v0 := range G.Nodes()[A[index]].Inj() {
+		for _, v0 := range G.Nodes[A[index]].Inc {
 			if !removed[v0] {
-				flag := G.Nodes()[v0].Player() == i
+				flag := G.Nodes[v0].Player == i
 				if tmpMap[v0] == 0 {
 					if flag {
 						A = append(A, v0)
 						tmpMap[v0] = 1
 					} else {
 						adj_counter := 0
-						for _, x := range G.Nodes()[v0].Adj() {
+						for _, x := range G.Nodes[v0].Adj {
 							if !removed[x] {
 								adj_counter += 1
 							}
@@ -53,7 +53,7 @@ func win(G *graphs.Graph, removed []bool) ([]int, []int) {
 	d := G.MaxPriority(removed)
 	if d > -1 {
 		U := []int{}
-		for _, v := range G.Priorities()[d] {
+		for _, v := range G.PriorityMap[d] {
 			if !removed[v] {
 				U = append(U, v)
 			}
@@ -88,7 +88,7 @@ func win(G *graphs.Graph, removed []bool) ([]int, []int) {
 // Win is implemented by RecursiveImproved and returns
 // the solution for a given game in input
 func (r RecursiveImproved) Win(G *graphs.Graph) ([]int, []int) {
-	removed := make([]bool, len(G.Nodes()))
+	removed := make([]bool, len(G.Nodes))
 	res1, res2 := win(G, removed)
 	return res1, res2
 }

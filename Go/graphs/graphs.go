@@ -16,63 +16,33 @@ import (
 // Node struct keeps track of adjacent and incident lists.
 // Its objects can be related to a vertex in a directed Graph
 // data structure.
-type node struct {
-	adj      []int
-	inj      []int
-	player   int
-	priority int
-}
-
-// Returns the node's Successors List
-func (n *node) Adj() []int {
-	return n.adj
-}
-
-// Returns the node's Predecessors List
-func (n *node) Inj() []int {
-	return n.inj
-}
-
-// Returns the node's Player
-func (n *node) Player() int {
-	return n.player
-}
-
-// Returns the node's Priority
-func (n *node) Priority() int {
-	return n.priority
+type Node struct {
+	Adj      []int
+	Inc      []int
+	Player   int
+	Priority int
 }
 
 // Graph is the main data structure, it has an array of 'node' objects
 // and a map keeping track of every node with a given priority
 type Graph struct {
-	priorityMap map[int][]int
-	nodes       []node
-}
-
-// Priorites returns the map of all priorities
-func (g *Graph) Priorities() map[int][]int {
-	return g.priorityMap
-}
-
-// Nodes returns the nodes array
-func (g *Graph) Nodes() []node {
-	return g.nodes
+	PriorityMap map[int][]int
+	Nodes       []*Node
 }
 
 // NewGraph builds a new graph and preallocates all nodes up to the parameter
 // 'numnodes' specified as input
 func NewGraph(numnodes int) *Graph {
 	G := &Graph{
-		nodes:       make([]node, numnodes, numnodes),
-		priorityMap: make(map[int][]int),
+		Nodes:       make([]*Node, numnodes, numnodes),
+		PriorityMap: make(map[int][]int),
 	}
-	for i := range G.nodes {
-		G.nodes[i] = node{
-			adj:      []int{},
-			inj:      []int{},
-			player:   -1,
-			priority: -1,
+	for i := range G.Nodes {
+		G.Nodes[i] = &Node{
+			Adj:      []int{},
+			Inc:      []int{},
+			Player:   -1,
+			Priority: -1,
 		}
 	}
 	return G
@@ -123,9 +93,9 @@ func NewGraphFromPGSolverFile() *Graph {
 // when looping through the graph
 func (g *Graph) MaxPriority(removed []bool) int {
 	max := -1
-	for i, _ := range g.nodes {
-		if !removed[i] && g.nodes[i].priority > max {
-			max = g.nodes[i].priority
+	for i, _ := range g.Nodes {
+		if !removed[i] && g.Nodes[i].Priority > max {
+			max = g.Nodes[i].Priority
 		}
 	}
 	return max
@@ -133,13 +103,13 @@ func (g *Graph) MaxPriority(removed []bool) int {
 
 // AddNode adds a node to the graph
 func (g *Graph) AddNode(newnode int, priority int, player int) {
-	g.priorityMap[priority] = append(g.priorityMap[priority], newnode)
-	g.nodes[newnode].player = player
-	g.nodes[newnode].priority = priority
+	g.PriorityMap[priority] = append(g.PriorityMap[priority], newnode)
+	g.Nodes[newnode].Player = player
+	g.Nodes[newnode].Priority = priority
 }
 
 // AddEdge adds a new edge to the graph
 func (g *Graph) AddEdge(origin int, destination int) {
-	g.nodes[origin].adj = append(g.nodes[origin].adj, destination)
-	g.nodes[destination].inj = append(g.nodes[destination].inj, origin)
+	g.Nodes[origin].Adj = append(g.Nodes[origin].Adj, destination)
+	g.Nodes[destination].Inc = append(g.Nodes[destination].Inc, origin)
 }
