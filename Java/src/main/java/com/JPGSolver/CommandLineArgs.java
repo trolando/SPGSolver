@@ -30,4 +30,7 @@ public class CommandLineArgs {
 
     @Parameter(names = "-parallel", description = "Parallelized Attractor")
     public boolean parallel = false;
+
+    @Parameter(names = "-iterative", description = "Explicited Stack")
+    public boolean iterative = false;
 }

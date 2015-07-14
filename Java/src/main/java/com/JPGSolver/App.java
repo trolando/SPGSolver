@@ -22,6 +22,16 @@ public class App {
         sw2.stop();
         System.out.println("Solved in " + sw2);
 
+        if (cli.iterative) {
+            Solver solver1 = new IterativeSolver();
+            Stopwatch sw3 = Stopwatch.createStarted();
+            int[][] solution1 = solver1.win(G);
+            sw2.stop();
+            System.out.println("Solved iteratively in " + sw3);
+            if (!Arrays.deepEquals(solution, solution1)){
+                System.out.println("Solutions do NOT match! ");
+            }
+        }
         if (cli.justHeat) {
             return;
         }

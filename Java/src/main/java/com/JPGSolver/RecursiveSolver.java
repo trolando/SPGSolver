@@ -14,7 +14,7 @@ public class RecursiveSolver implements Solver {
         return win_improved(G, removed);
     }
 
-    private TIntArrayList Attr(Graph G, TIntArrayList A, int i, BitSet removed) {
+    protected TIntArrayList Attr(Graph G, TIntArrayList A, int i, BitSet removed) {
         final int[] tmpMap = new int[G.length()];
         TIntIterator it = A.iterator();
         while (it.hasNext()) {
