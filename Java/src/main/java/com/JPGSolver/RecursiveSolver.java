@@ -54,6 +54,11 @@ public class RecursiveSolver implements Solver {
             }
             index += 1;
         }
+        it = A.iterator();
+        while (it.hasNext()) {
+            removed.set(it.next());
+        }
+        sw1.stop();
         return A;
     }
 
@@ -67,20 +72,12 @@ public class RecursiveSolver implements Solver {
             int[][] W1;
             BitSet removed1 = (BitSet)removed.clone();
             final TIntArrayList A = Attr(G, U, p, removed1);
-            TIntIterator it = A.iterator();
-            while (it.hasNext()) {
-                removed1.set(it.next());
-            }
             W1 = win_improved(G, removed1);
             if (W1[j].length == 0) {
                 W[p] = Ints.concat(W1[p], A.toArray());
             } else {
                 BitSet removed2 = (BitSet)removed.clone();
                 final TIntArrayList B = Attr(G, new TIntArrayList(W1[j]), j, removed2);
-                TIntIterator it2 = A.iterator();
-                while (it2.hasNext()) {
-                    removed2.set(it2.next());
-                }
                 W1 = win_improved(G, removed2);
                 W[p] = W1[p];
                 W[j] = Ints.concat(W1[j], B.toArray());
