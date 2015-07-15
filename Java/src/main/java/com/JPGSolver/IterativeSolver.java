@@ -1,28 +1,20 @@
 package com.JPGSolver;
 
 import com.google.common.primitives.Ints;
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
 
-import java.lang.Thread;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Stack;
-import java.util.concurrent.ArrayBlockingQueue;
-
-import java.util.stream.IntStream;
 
 
 public class IterativeSolver extends RecursiveSolver {
 
-    // (First rule)
     private class Snapshot{
 
         public BitSet removed;
         public int[][] W;
         public int stage;
 
-        //local variables that will be used after returning from the function call
         public int[][] W1;
         public TIntArrayList A;
         public TIntArrayList B;
@@ -69,7 +61,6 @@ public class IterativeSolver extends RecursiveSolver {
                     TIntArrayList U = G.getNodesWithPriority(d, removed);
                     int p = d % 2;
                     int j = 1 - p;
-                    //int[][] W1;
                     BitSet removed1 = (BitSet) removed.clone();
                     final TIntArrayList A = Attr(G, U, p, removed1);
 
