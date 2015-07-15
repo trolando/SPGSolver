@@ -57,11 +57,21 @@ public class Graph {
         public TIntArrayList getInj() {
             return inj;
         }
+
+        public String toString(){
+            if (player == 0){
+                return "(" + String.format("%02d", priority) + ")";
+            } else {
+                return "[" + String.format("%02d", priority) + "]";
+            }
+        }
     }
 
     private final Node[] info;
+    private final int numNodes;
 
     public Graph(int numNodes) {
+        this.numNodes = numNodes;
         info = new Node[numNodes];
         for (int i = 0; i < numNodes; i++) {
             info[i] = new Node();
@@ -140,5 +150,54 @@ public class Graph {
             System.out.println("File not found, please check your input.");
         }
         return graph;
+    }
+
+    public String toString(){
+        String out = "        ";
+        for (int i = 0; i < numNodes; i++) out += "  " + info[i] + " ";
+        out += "\n        ";
+        for (int i = 0; i < numNodes; i++) out += "   ^   ";
+        out += "\n";
+        for (int i = 0; i < numNodes; i++){
+            Node node = info[i];
+            out += node + "  > ";
+            for (int y = 0; y < numNodes; y++){
+                if (node.adj.contains(y)){
+                    out += "   1   ";
+                } else {
+                    out += "   0   ";
+                }
+            }
+            out += "\n";
+        }
+        return out;
+    }
+
+    public String toString(int v0, TIntArrayList A){
+        String out = "        ";
+        for (int i = 0; i < numNodes; i++){
+            if (i == v0)
+                out += " !" + info[i] + "!";
+            else if (A.contains(i))
+                out += " {" + info[i] + "}";
+            else
+                out += "  " + info[i] + " ";
+        }
+        out += "\n        ";
+        for (int i = 0; i < numNodes; i++) out += "   ^   ";
+        out += "\n";
+        for (int i = 0; i < numNodes; i++){
+            Node node = info[i];
+            out += node + "  > ";
+            for (int y = 0; y < numNodes; y++){
+                if (node.adj.contains(y)){
+                    out += "   1   ";
+                } else {
+                    out += "   0   ";
+                }
+            }
+            out += "\n";
+        }
+        return out;
     }
 }
