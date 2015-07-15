@@ -30,6 +30,8 @@ public class IterativeSolver extends RecursiveSolver {
         public int p;
 
         public Snapshot(BitSet bitset, int stage){
+            int[][] W = {new int[0], new int[0]};
+            this.W = W;
             this.removed = bitset;
             this.stage = stage;
         }
@@ -62,7 +64,7 @@ public class IterativeSolver extends RecursiveSolver {
                 /* --------------------- */
 
                 int d = G.maxPriority(removed);
-                int[][] W = {new int[0], new int[0]};
+                int[][] W = currentSnapshot.W;
                 if (d > -1) {
                     TIntArrayList U = G.getNodesWithPriority(d, removed);
                     int p = d % 2;
@@ -96,6 +98,7 @@ public class IterativeSolver extends RecursiveSolver {
 
                 if (W1[j].length == 0) {
                     W[p] = Ints.concat(W1[p], A.toArray());
+                    retVal = W;
                 } else {
                     BitSet removed2 = (BitSet) removed.clone();
                     TIntArrayList B = Attr(G, new TIntArrayList(W1[j]), j, removed2);
@@ -120,6 +123,7 @@ public class IterativeSolver extends RecursiveSolver {
 
                 W[p] = W1[p];
                 W[j] = Ints.concat(W1[j], B.toArray());
+                retVal = W;
             }
         }
         return retVal;

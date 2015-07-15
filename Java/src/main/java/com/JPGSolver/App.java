@@ -2,6 +2,7 @@ package com.JPGSolver;
 
 import com.beust.jcommander.JCommander;
 import com.google.common.base.Stopwatch;
+import com.google.common.primitives.Ints;
 
 import java.util.Arrays;
 
@@ -15,23 +16,13 @@ public class App {
         Graph G = Graph.initFromFile(cli.files.get(0));
         sw1.stop();
         System.out.println("Parsed in " + sw1);
-        Solver solver = cli.parallel ? new ImprovedRecursiveSolver() : new RecursiveSolver();
+        Solver solver = cli.parallel ? new ImprovedRecursiveSolver() : cli.iterative ?new IterativeSolver() : new RecursiveSolver();
 
         Stopwatch sw2 = Stopwatch.createStarted();
         int[][] solution = solver.win(G);
         sw2.stop();
         System.out.println("Solved in " + sw2);
 
-        if (cli.iterative) {
-            Solver solver1 = new IterativeSolver();
-            Stopwatch sw3 = Stopwatch.createStarted();
-            int[][] solution1 = solver1.win(G);
-            sw2.stop();
-            System.out.println("Solved iteratively in " + sw3);
-            if (!Arrays.deepEquals(solution, solution1)){
-                System.out.println("Solutions do NOT match! ");
-            }
-        }
         if (cli.justHeat) {
             return;
         }
@@ -39,6 +30,10 @@ public class App {
         Arrays.sort(solution[0]);
         Arrays.sort(solution[1]);
 
+        printSolution(solution);
+    }
+
+    public static void printSolution(int[][] solution){
         System.out.print("\nSolution for player 0:\n{");
         int index = 0;
         for (int x : solution[0]) {
@@ -61,5 +56,15 @@ public class App {
             index += 1;
         }
         System.out.println();
+    }
+
+    public static boolean checkSolution(int[][] s1, int[][] s2){
+        for (int x : s1[0]) {
+            if (!Ints.contains(s2[0], x)) return false;
+        }
+        for (int x : s1[1]) {
+            if (!Ints.contains(s2[1], x)) return false;
+        }
+        return true;
     }
 }
