@@ -58,7 +58,6 @@ public class RecursiveSolver implements Solver {
         while (it.hasNext()) {
             removed.set(it.next());
         }
-        sw1.stop();
         return A;
     }
 
