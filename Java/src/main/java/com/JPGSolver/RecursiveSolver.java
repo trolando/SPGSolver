@@ -1,5 +1,6 @@
 package com.JPGSolver;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
@@ -8,6 +9,15 @@ import java.util.BitSet;
 
 
 public class RecursiveSolver implements Solver {
+
+    public Stopwatch sw1;
+    public Stopwatch sw2;
+
+    public RecursiveSolver(){
+        sw1 = Stopwatch.createUnstarted();
+        sw2 = Stopwatch.createUnstarted();
+    }
+
     @Override
     public int[][] win(Graph G) {
         BitSet removed = new BitSet(G.length());
@@ -21,8 +31,11 @@ public class RecursiveSolver implements Solver {
             tmpMap[it.next()] = 1;
         }
         int index = 0;
+
+        sw1.start();
         while (index < A.size()) {
             final TIntIterator iter = G.incomingEdgesOf(A.get(index)).iterator();
+            sw2.start();
             while(iter.hasNext()) {
                 int v0 = iter.next();
                 if (!removed.get(v0)) {
@@ -52,12 +65,14 @@ public class RecursiveSolver implements Solver {
                     }
                 }
             }
+            sw2.stop();
             index += 1;
         }
         it = A.iterator();
         while (it.hasNext()) {
             removed.set(it.next());
         }
+        sw1.stop();
         return A;
     }
 

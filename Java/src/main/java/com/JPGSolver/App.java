@@ -16,12 +16,16 @@ public class App {
         Graph G = Graph.initFromFile(cli.files.get(0));
         sw1.stop();
         System.out.println("Parsed in " + sw1);
-        Solver solver = cli.parallel ? new ImprovedRecursiveSolver() : cli.iterative ?new IterativeSolver() : new RecursiveSolver();
+        //Solver solver = cli.parallel ? new ImprovedRecursiveSolver() : cli.iterative ?new IterativeSolver() : new RecursiveSolver();
+        RecursiveSolver solver = new RecursiveSolver();
 
         Stopwatch sw2 = Stopwatch.createStarted();
         int[][] solution = solver.win(G);
         sw2.stop();
         System.out.println("Solved in " + sw2);
+
+        System.out.println("outer while: " + solver.sw1);
+        System.out.println("inner for: " + solver.sw2);
 
         if (cli.justHeat) {
             return;
