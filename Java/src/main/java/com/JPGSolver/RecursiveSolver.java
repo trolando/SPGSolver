@@ -12,6 +12,10 @@ public class RecursiveSolver implements Solver {
 
     public Stopwatch sw1;
     public Stopwatch sw2;
+    public int countFor = 0;
+    public int countWhile = 0;
+    public int countAttr = 0;
+    public int countCalls = 0;
 
     public RecursiveSolver(){
         sw1 = Stopwatch.createUnstarted();
@@ -25,6 +29,7 @@ public class RecursiveSolver implements Solver {
     }
 
     protected TIntArrayList Attr(Graph G, TIntArrayList A, int i, BitSet removed) {
+        countAttr++;
         final int[] tmpMap = new int[G.length()];
         TIntIterator it = A.iterator();
         while (it.hasNext()) {
@@ -34,9 +39,11 @@ public class RecursiveSolver implements Solver {
 
         sw1.start();
         while (index < A.size()) {
+            countWhile++;
             final TIntIterator iter = G.incomingEdgesOf(A.get(index)).iterator();
             sw2.start();
             while(iter.hasNext()) {
+                countFor++;
                 int v0 = iter.next();
                 if (!removed.get(v0)) {
                     boolean flag = G.getPlayerOf(v0) == i;
@@ -77,6 +84,7 @@ public class RecursiveSolver implements Solver {
     }
 
     private int[][] win_improved(Graph G, BitSet removed) {
+        countCalls++;
         final int[][] W = {new int[0], new int[0]};
         final int d = G.maxPriority(removed);
         if (d > -1) {

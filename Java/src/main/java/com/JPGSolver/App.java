@@ -24,8 +24,12 @@ public class App {
         sw2.stop();
         System.out.println("Solved in " + sw2);
 
+        System.out.println("Recursive calls: " + solver.countCalls);
+        System.out.println("Attractor calls: " + solver.countAttr );
         System.out.println("outer while: " + solver.sw1);
+        System.out.println("Iterated " + solver.countWhile + " times");
         System.out.println("inner for: " + solver.sw2);
+        System.out.println("Iterated " + solver.countFor + " times");
 
         if (cli.justHeat) {
             return;
