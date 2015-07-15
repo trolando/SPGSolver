@@ -70,10 +70,6 @@ public class IterativeSolver extends RecursiveSolver {
                     //int[][] W1;
                     BitSet removed1 = (BitSet) removed.clone();
                     final TIntArrayList A = Attr(G, U, p, removed1);
-                    TIntIterator it = A.iterator();
-                    while (it.hasNext()) {
-                        removed1.set(it.next());
-                    }
 
                     /* -- Recursive Logic -- */
                     currentSnapshot.stage = 1;
@@ -103,10 +99,6 @@ public class IterativeSolver extends RecursiveSolver {
                 } else {
                     BitSet removed2 = (BitSet) removed.clone();
                     TIntArrayList B = Attr(G, new TIntArrayList(W1[j]), j, removed2);
-                    TIntIterator it2 = A.iterator();
-                    while (it2.hasNext()) {
-                        removed2.set(it2.next());
-                    }
 
                     /* -- Recursive Logic -- */
                     currentSnapshot.stage = 2;
