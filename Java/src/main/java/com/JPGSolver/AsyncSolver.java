@@ -21,9 +21,14 @@ public class AsyncSolver implements Solver {
     //ArrayList<Thread> threads;
     ExecutorService executor;
 
+    int min = Integer.MAX_VALUE;
+    int max = Integer.MIN_VALUE;
+    TIntArrayList avg;
+
     public AsyncSolver(){
         executor = Executors.newFixedThreadPool(4);
         //threads = new ArrayList<>();
+        avg = new TIntArrayList();
     }
 
     @Override
@@ -34,6 +39,9 @@ public class AsyncSolver implements Solver {
         BitSet removed = new BitSet(G.length());
         int[][] res =  win_improved(G, removed);
         //System.out.println("Threads: " + threads.size());
+        System.out.println("Min: " + min);
+        System.out.println("Max: " + max);
+        System.out.println("Avg: " + (avg.sum()/avg.size()));
         executor.shutdown();
         return res;
     }
@@ -102,6 +110,11 @@ public class AsyncSolver implements Solver {
                 tasks.add(new FutureTask<>(new asyncAttr(A.get(index), removed, i)));
                 index += 1;
             }
+
+            int size = tasks.size();
+            if (size < min) min = size;
+            if (size > max) max = size;
+            avg.add(size);
 
             try {
                 for (FutureTask<TIntArrayList> task : tasks) executor.execute(task);
