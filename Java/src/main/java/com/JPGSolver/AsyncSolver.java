@@ -16,14 +16,12 @@ import java.util.concurrent.FutureTask;
 public class AsyncSolver implements Solver {
 
     protected Graph G;
-    int[] tmpMap;
-    int[] check;
-    //ArrayList<Thread> threads;
-    ExecutorService executor;
+    protected int[] tmpMap;
+    protected int[] check;
+    protected ExecutorService executor;
 
     public AsyncSolver(){
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        //threads = new ArrayList<>();
     }
 
     @Override
@@ -33,7 +31,6 @@ public class AsyncSolver implements Solver {
         this.check = new int[G.length()];
         BitSet removed = new BitSet(G.length());
         int[][] res =  win_improved(G, removed);
-        //System.out.println("Threads: " + threads.size());
         executor.shutdown();
         return res;
     }
@@ -51,7 +48,6 @@ public class AsyncSolver implements Solver {
         }
 
         public TIntArrayList call() {
-            //if (!threads.contains(Thread.currentThread())) threads.add(Thread.currentThread());
             final TIntIterator iter = G.incomingEdgesOf(node).iterator();
             TIntArrayList A = new TIntArrayList();
             while (iter.hasNext()) {
@@ -105,9 +101,10 @@ public class AsyncSolver implements Solver {
 
             try {
                 for (FutureTask<TIntArrayList> task : tasks) executor.execute(task);
-                for (FutureTask<TIntArrayList> task : tasks) MyTrove.addAllEx(A, task.get(), check); //if (!A.containsAll(task.get())) A.addAll(task.get());
+                for (FutureTask<TIntArrayList> task : tasks) MyTrove.addAllEx(A, task.get(), check);
             } catch (Exception e) {
-                System.out.println("Error!");
+                executor.shutdown();
+                throw new RuntimeException("Future get Exception");
             }
         }
         it = A.iterator();
