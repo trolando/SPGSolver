@@ -16,7 +16,7 @@ public class App {
         Graph G = Graph.initFromFile(cli.files.get(0));
         sw1.stop();
         System.out.println("Parsed in " + sw1);
-        Solver solver = cli.parallel ? new ImprovedRecursiveSolver() : cli.iterative ?new IterativeSolver() : new RecursiveSolver();
+        Solver solver = cli.parallel ? new AsyncSolver() : cli.iterative ?new IterativeSolver() : new RecursiveSolver();
 
         Stopwatch sw2 = Stopwatch.createStarted();
         int[][] solution = solver.win(G);
