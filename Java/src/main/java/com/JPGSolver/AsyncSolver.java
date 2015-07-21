@@ -17,12 +17,12 @@ public class AsyncSolver implements Solver {
 
     protected Graph G;
     int[] tmpMap;
-    ArrayList<Thread> threads;
+    //ArrayList<Thread> threads;
     ExecutorService executor;
 
     public AsyncSolver(){
         executor = Executors.newFixedThreadPool(8);
-        threads = new ArrayList<>();
+        //threads = new ArrayList<>();
     }
 
     @Override
@@ -31,7 +31,7 @@ public class AsyncSolver implements Solver {
         this.tmpMap = new int[G.length()];
         BitSet removed = new BitSet(G.length());
         int[][] res =  win_improved(G, removed);
-        System.out.println("Threads: " + threads.size());
+        //System.out.println("Threads: " + threads.size());
         return res;
     }
 
@@ -48,8 +48,7 @@ public class AsyncSolver implements Solver {
         }
 
         public TIntArrayList call() {
-            if (!threads.contains(Thread.currentThread())) threads.add(Thread.currentThread());
-            //final TIntIterator iter = G.incomingEdgesOf(A.get(index)).iterator();
+            //if (!threads.contains(Thread.currentThread())) threads.add(Thread.currentThread());
             final TIntIterator iter = G.incomingEdgesOf(node).iterator();
             TIntArrayList A = new TIntArrayList();
             while (iter.hasNext()) {
@@ -96,13 +95,9 @@ public class AsyncSolver implements Solver {
 
         int index = 0;
         ArrayList<FutureTask<TIntArrayList>> tasks = new ArrayList<>();
-        //System.out.println("In!");
         while (index < A.size()) {
-            //System.out.println("1: " + A.size());
             while (index < A.size()) {
-                //System.out.println("2: " + A.size());
                 tasks.add(new FutureTask<>(new asyncAttr(A.get(index), removed, i)));
-                //A.addAll(new asyncAttr(A.get(index), removed, i).call());
                 index += 1;
             }
 
@@ -110,10 +105,9 @@ public class AsyncSolver implements Solver {
                 for (FutureTask<TIntArrayList> task : tasks) executor.execute(task);
                 for (FutureTask<TIntArrayList> task : tasks) if (!A.containsAll(task.get())) A.addAll(task.get());
             } catch (Exception e) {
-                System.out.println("Cazz!");
+                System.out.println("Error!");
             }
         }
-        //System.out.println("out!");
         it = A.iterator();
         while (it.hasNext()) {
             removed.set(it.next());
