@@ -80,8 +80,6 @@ public class AsyncSolver implements Solver {
                     }
                 }
             }
-            //if (A.isEmpty()) System.out.println("Empty... " + node + " " + (removed.size() == G.numNodes) + " " + i);
-            //else System.out.println("Thread: " + Thread.currentThread() + " Res: " + A);
             return A;
         }
     }
@@ -103,7 +101,7 @@ public class AsyncSolver implements Solver {
 
             try {
                 for (FutureTask<TIntArrayList> task : tasks) executor.execute(task);
-                for (FutureTask<TIntArrayList> task : tasks) if (!A.containsAll(task.get())) A.addAll(task.get());
+                for (FutureTask<TIntArrayList> task : tasks) MyTrove.addAllEx(A, task.get()); //if (!A.containsAll(task.get())) A.addAll(task.get());
             } catch (Exception e) {
                 System.out.println("Error!");
             }
