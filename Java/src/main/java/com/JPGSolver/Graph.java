@@ -68,7 +68,7 @@ public class Graph {
     }
 
     private final Node[] info;
-    private final int numNodes;
+    public final int numNodes;
 
     public Graph(int numNodes) {
         this.numNodes = numNodes;

@@ -4,17 +4,25 @@ import com.google.common.primitives.Ints;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 
 public class AsyncSolver implements Solver {
 
     protected Graph G;
     int[] tmpMap;
+    ArrayList<Thread> threads;
+    ExecutorService executor;
 
     public AsyncSolver(){
-
+        executor = Executors.newFixedThreadPool(8);
+        threads = new ArrayList<>();
     }
 
     @Override
@@ -22,43 +30,61 @@ public class AsyncSolver implements Solver {
         this.G = G;
         this.tmpMap = new int[G.length()];
         BitSet removed = new BitSet(G.length());
-        return win_improved(G, removed);
+        int[][] res =  win_improved(G, removed);
+        System.out.println("Threads: " + threads.size());
+        return res;
     }
 
-    protected TIntArrayList asyncAttr(int node, BitSet removed, int i){
-        //final TIntIterator iter = G.incomingEdgesOf(A.get(index)).iterator();
-        final TIntIterator iter = G.incomingEdgesOf(node).iterator();
-        TIntArrayList A = new TIntArrayList();
-        while(iter.hasNext()) {
-            int v0 = iter.next();
-            if (!removed.get(v0)) {
-                boolean flag = G.getPlayerOf(v0) == i;
-                if (tmpMap[v0] == 0) {
-                    if (flag) {
-                        A.add(v0);
-                        tmpMap[v0] = 1;
-                    } else {
-                        int adjCounter = 0;
-                        TIntIterator it = G.outgoingEdgesOf(v0).iterator();
-                        while (it.hasNext()) {
-                            if (!removed.get(it.next())) {
-                                adjCounter += 1;
+    protected class asyncAttr implements Callable<TIntArrayList> {
+
+        int node;
+        BitSet removed;
+        int i;
+
+        public asyncAttr(int node, BitSet removed, int i){
+            this.node = node;
+            this.removed = removed;
+            this.i = i;
+        }
+
+        public TIntArrayList call() {
+            if (!threads.contains(Thread.currentThread())) threads.add(Thread.currentThread());
+            //final TIntIterator iter = G.incomingEdgesOf(A.get(index)).iterator();
+            final TIntIterator iter = G.incomingEdgesOf(node).iterator();
+            TIntArrayList A = new TIntArrayList();
+            while (iter.hasNext()) {
+                int v0 = iter.next();
+                if (!removed.get(v0)) {
+                    boolean flag = G.getPlayerOf(v0) == i;
+                    if (tmpMap[v0] == 0) {
+                        if (flag) {
+                            A.add(v0);
+                            tmpMap[v0] = 1;
+                        } else {
+                            int adjCounter = 0;
+                            TIntIterator it = G.outgoingEdgesOf(v0).iterator();
+                            while (it.hasNext()) {
+                                if (!removed.get(it.next())) {
+                                    adjCounter += 1;
+                                }
+                            }
+                            tmpMap[v0] = adjCounter;
+                            if (adjCounter == 1) {
+                                A.add(v0);
                             }
                         }
-                        tmpMap[v0] = adjCounter;
-                        if (adjCounter == 1) {
+                    } else if (!flag && tmpMap[v0] > 1) {
+                        tmpMap[v0] -= 1;
+                        if (tmpMap[v0] == 1) {
                             A.add(v0);
                         }
                     }
-                } else if (!flag && tmpMap[v0] > 1) {
-                    tmpMap[v0] -= 1;
-                    if (tmpMap[v0] == 1) {
-                        A.add(v0);
-                    }
                 }
             }
+            //if (A.isEmpty()) System.out.println("Empty... " + node + " " + (removed.size() == G.numNodes) + " " + i);
+            //else System.out.println("Thread: " + Thread.currentThread() + " Res: " + A);
+            return A;
         }
-        return A;
     }
 
     protected TIntArrayList Attr(TIntArrayList A, int i, BitSet removed) {
@@ -67,11 +93,27 @@ public class AsyncSolver implements Solver {
         while (it.hasNext()) {
             tmpMap[it.next()] = 1;
         }
+
         int index = 0;
+        ArrayList<FutureTask<TIntArrayList>> tasks = new ArrayList<>();
+        //System.out.println("In!");
         while (index < A.size()) {
-            A.addAll(asyncAttr(A.get(index), removed, i));
-            index += 1;
+            //System.out.println("1: " + A.size());
+            while (index < A.size()) {
+                //System.out.println("2: " + A.size());
+                tasks.add(new FutureTask<>(new asyncAttr(A.get(index), removed, i)));
+                //A.addAll(new asyncAttr(A.get(index), removed, i).call());
+                index += 1;
+            }
+
+            try {
+                for (FutureTask<TIntArrayList> task : tasks) executor.execute(task);
+                for (FutureTask<TIntArrayList> task : tasks) if (!A.containsAll(task.get())) A.addAll(task.get());
+            } catch (Exception e) {
+                System.out.println("Cazz!");
+            }
         }
+        //System.out.println("out!");
         it = A.iterator();
         while (it.hasNext()) {
             removed.set(it.next());
