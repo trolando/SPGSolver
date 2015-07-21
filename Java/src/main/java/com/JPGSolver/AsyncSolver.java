@@ -22,7 +22,7 @@ public class AsyncSolver implements Solver {
     ExecutorService executor;
 
     public AsyncSolver(){
-        executor = Executors.newFixedThreadPool(8);
+        executor = Executors.newFixedThreadPool(4);
         //threads = new ArrayList<>();
     }
 
