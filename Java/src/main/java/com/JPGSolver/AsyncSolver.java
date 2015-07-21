@@ -3,8 +3,8 @@ package com.JPGSolver;
 import com.google.common.primitives.Ints;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
 
+import java.util.Arrays;
 import java.util.BitSet;
 
 
@@ -62,7 +62,7 @@ public class AsyncSolver implements Solver {
     }
 
     protected TIntArrayList Attr(TIntArrayList A, int i, BitSet removed) {
-        final int[] tmpMap = new int[G.length()];
+        Arrays.parallelSetAll(tmpMap, x -> 0);
         TIntIterator it = A.iterator();
         while (it.hasNext()) {
             tmpMap[it.next()] = 1;
