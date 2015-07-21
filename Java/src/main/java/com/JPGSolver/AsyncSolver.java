@@ -17,6 +17,7 @@ public class AsyncSolver implements Solver {
 
     protected Graph G;
     int[] tmpMap;
+    int[] check;
     //ArrayList<Thread> threads;
     ExecutorService executor;
 
@@ -29,9 +30,11 @@ public class AsyncSolver implements Solver {
     public int[][] win(Graph G) {
         this.G = G;
         this.tmpMap = new int[G.length()];
+        this.check = new int[G.length()];
         BitSet removed = new BitSet(G.length());
         int[][] res =  win_improved(G, removed);
         //System.out.println("Threads: " + threads.size());
+        executor.shutdown();
         return res;
     }
 
@@ -86,6 +89,7 @@ public class AsyncSolver implements Solver {
 
     protected TIntArrayList Attr(TIntArrayList A, int i, BitSet removed) {
         Arrays.parallelSetAll(tmpMap, x -> 0);
+        Arrays.parallelSetAll(check, x -> 0);
         TIntIterator it = A.iterator();
         while (it.hasNext()) {
             tmpMap[it.next()] = 1;
@@ -101,7 +105,7 @@ public class AsyncSolver implements Solver {
 
             try {
                 for (FutureTask<TIntArrayList> task : tasks) executor.execute(task);
-                for (FutureTask<TIntArrayList> task : tasks) MyTrove.addAllEx(A, task.get()); //if (!A.containsAll(task.get())) A.addAll(task.get());
+                for (FutureTask<TIntArrayList> task : tasks) MyTrove.addAllEx(A, task.get(), check); //if (!A.containsAll(task.get())) A.addAll(task.get());
             } catch (Exception e) {
                 System.out.println("Error!");
             }

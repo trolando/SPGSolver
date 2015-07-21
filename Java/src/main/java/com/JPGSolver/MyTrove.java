@@ -22,4 +22,19 @@ public class MyTrove {
         return changed;
     }
 
+    public static boolean addAllEx(TIntCollection A, TIntCollection collection, int[] checker){
+        boolean changed = false;
+        TIntIterator iter = collection.iterator();
+        while ( iter.hasNext() ) {
+            int element = iter.next();
+            if ( checker[element] == 0) {
+                if (A.add(element)) {
+                    checker[element] = 1;
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+
 }
