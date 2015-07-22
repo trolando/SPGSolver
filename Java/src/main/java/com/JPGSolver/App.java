@@ -23,6 +23,10 @@ public class App {
         sw2.stop();
         System.out.println("Solved in " + sw2);
 
+        Solver solver2 = new RecursiveSolver();
+        int[][] solution2 = solver2.win(G);
+        System.out.print(checkSolution(solution, solution2));
+
         if (cli.justHeat) {
             return;
         }
