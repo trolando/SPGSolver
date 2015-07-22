@@ -30,7 +30,7 @@ public class AsyncSolver implements Solver {
         this.tmpMap = new int[G.length()];
         this.check = new int[G.length()];
         BitSet removed = new BitSet(G.length());
-        int[][] res =  win_improved(G, removed);
+        int[][] res =  win_improved(removed);
         executor.shutdown();
         return res;
     }
@@ -114,7 +114,7 @@ public class AsyncSolver implements Solver {
         return A;
     }
 
-    private int[][] win_improved(Graph G, BitSet removed) {
+    private int[][] win_improved(BitSet removed) {
         final int[][] W = {new int[0], new int[0]};
         final int d = G.maxPriority(removed);
         if (d > -1) {
@@ -124,13 +124,13 @@ public class AsyncSolver implements Solver {
             int[][] W1;
             BitSet removed1 = (BitSet)removed.clone();
             final TIntArrayList A = Attr(U, p, removed1);
-            W1 = win_improved(G, removed1);
+            W1 = win_improved(removed1);
             if (W1[j].length == 0) {
                 W[p] = Ints.concat(W1[p], A.toArray());
             } else {
                 BitSet removed2 = (BitSet)removed.clone();
                 final TIntArrayList B = Attr(new TIntArrayList(W1[j]), j, removed2);
-                W1 = win_improved(G, removed2);
+                W1 = win_improved(removed2);
                 W[p] = W1[p];
                 W[j] = Ints.concat(W1[j], B.toArray());
             }
