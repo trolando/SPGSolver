@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/vinceprignano/SPGSolver/Go/utils"
@@ -17,6 +18,7 @@ import (
 // Its objects can be related to a vertex in a directed Graph
 // data structure.
 type Node struct {
+	sync.Mutex
 	Adj      []int
 	Inc      []int
 	Player   int
@@ -26,6 +28,7 @@ type Node struct {
 // Graph is the main data structure, it has an array of 'node' objects
 // and a map keeping track of every node with a given priority
 type Graph struct {
+	sync.Mutex
 	PriorityMap map[int][]int
 	Nodes       []*Node
 }
@@ -66,26 +69,34 @@ func NewGraphFromPGSolverFile() *Graph {
 		fmt.Fprintln(os.Stderr, "Error when reading from the file:", err)
 	}
 	G := NewGraph(numnodes + 1)
+	wg := &sync.WaitGroup{}
 	for {
 		line, err := file.ReadString((byte)('\n'))
 		if err == io.EOF {
 			break
 		}
-		x := strings.Split(line, " ")
-		node := x[0:3]
-		i, _ := strconv.Atoi(node[0])
-		priority, _ := strconv.Atoi(node[1])
-		player, _ := strconv.Atoi(node[2])
-		G.AddNode(i, priority, player)
-		edges := strings.Split(x[3:len(x)][0], ",")
-		edges[len(edges)-1] = strings.Replace(edges[len(edges)-1], ";", "", -1)
-		edges[len(edges)-1] = strings.Replace(edges[len(edges)-1], "\n", "", -1)
-		for _, dest := range edges {
-			destination, _ := strconv.Atoi(dest)
-			G.AddEdge(i, destination)
-		}
+		wg.Add(1)
+		go addLineToGraph(G, line, wg)
 	}
+	wg.Wait()
 	return G
+}
+
+func addLineToGraph(G *Graph, line string, wg *sync.WaitGroup) {
+	x := strings.Split(line, " ")
+	node := x[0:3]
+	i, _ := strconv.Atoi(node[0])
+	priority, _ := strconv.Atoi(node[1])
+	player, _ := strconv.Atoi(node[2])
+	G.AddNode(i, priority, player)
+	edges := strings.Split(x[3:len(x)][0], ",")
+	edges[len(edges)-1] = strings.Replace(edges[len(edges)-1], ";", "", -1)
+	edges[len(edges)-1] = strings.Replace(edges[len(edges)-1], "\n", "", -1)
+	for _, dest := range edges {
+		destination, _ := strconv.Atoi(dest)
+		G.AddEdge(i, destination)
+	}
+	wg.Done()
 }
 
 // MaxPriority returns the max priority in the graph
@@ -103,13 +114,20 @@ func (g *Graph) MaxPriority(removed []bool) int {
 
 // AddNode adds a node to the graph
 func (g *Graph) AddNode(newnode int, priority int, player int) {
+	g.Lock()
 	g.PriorityMap[priority] = append(g.PriorityMap[priority], newnode)
 	g.Nodes[newnode].Player = player
 	g.Nodes[newnode].Priority = priority
+	g.Unlock()
 }
 
 // AddEdge adds a new edge to the graph
 func (g *Graph) AddEdge(origin int, destination int) {
+	g.Nodes[origin].Lock()
 	g.Nodes[origin].Adj = append(g.Nodes[origin].Adj, destination)
+	g.Nodes[origin].Unlock()
+
+	g.Nodes[destination].Lock()
 	g.Nodes[destination].Inc = append(g.Nodes[destination].Inc, origin)
+	g.Nodes[destination].Unlock()
 }
