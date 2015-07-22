@@ -67,7 +67,7 @@ public class Graph {
         }
     }
 
-    private final Node[] info;
+    public final Node[] info;
     public final int numNodes;
 
     public Graph(int numNodes) {

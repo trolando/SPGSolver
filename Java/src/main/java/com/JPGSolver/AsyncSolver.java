@@ -54,29 +54,37 @@ public class AsyncSolver implements Solver {
                 int v0 = iter.next();
                 if (!removed.get(v0)) {
                     boolean flag = G.getPlayerOf(v0) == i;
-                    if (tmpMap[v0] == 0) {
-                        if (flag) {
-                            A.add(v0);
-                            tmpMap[v0] = 1;
-                        } else {
-                            int adjCounter = 0;
-                            TIntIterator it = G.outgoingEdgesOf(v0).iterator();
-                            while (it.hasNext()) {
-                                if (!removed.get(it.next())) {
-                                    adjCounter += 1;
+                    synchronized (G.info[v0]) {
+                        if (tmpMap[v0] == 0) {
+                            if (flag) {
+                                A.add(v0);
+                                tmpMap[v0] = 1;
+                            } else {
+                                int adjCounter = 0;
+                                TIntIterator it = G.outgoingEdgesOf(v0).iterator();
+                                while (it.hasNext()) {
+                                    if (!removed.get(it.next())) {
+                                        adjCounter += 1;
+                                    }
+                                }
+//                                try {
+//                                    Thread.sleep(5);
+//                                } catch (InterruptedException ex) {
+//                                    Thread.currentThread().interrupt();
+//                                }
+                                tmpMap[v0] = adjCounter;
+                                if (adjCounter == 1) {
+                                    A.add(v0);
                                 }
                             }
-                            tmpMap[v0] = adjCounter;
-                            if (adjCounter == 1) {
+                        } else if (!flag && tmpMap[v0] > 1) {
+                            tmpMap[v0] -= 1;
+                            if (tmpMap[v0] == 1) {
                                 A.add(v0);
                             }
                         }
-                    } else if (!flag && tmpMap[v0] > 1) {
-                        tmpMap[v0] -= 1;
-                        if (tmpMap[v0] == 1) {
-                            A.add(v0);
-                        }
                     }
+
                 }
             }
             return A;
