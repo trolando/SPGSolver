@@ -1,6 +1,11 @@
 package solvers
 
-import "github.com/vinceprignano/SPGSolver/Go/graphs"
+import (
+	"time"
+
+	"github.com/vinceprignano/SPGSolver/Go/graphs"
+	"github.com/vinceprignano/SPGSolver/Go/utils"
+)
 
 type RecursiveImproved struct{}
 
@@ -88,6 +93,7 @@ func (r *RecursiveImproved) win(G *graphs.Graph, removed []bool) ([]int, []int) 
 // Win is implemented by RecursiveImproved and returns
 // the solution for a given game in input
 func (r *RecursiveImproved) Win(G *graphs.Graph) ([]int, []int) {
+	defer utils.TimeTrack(time.Now(), "Solve with Recursive")
 	removed := make([]bool, len(G.Nodes))
 	res1, res2 := r.win(G, removed)
 	return res1, res2

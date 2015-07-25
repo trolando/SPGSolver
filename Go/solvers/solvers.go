@@ -1,11 +1,6 @@
 package solvers
 
-import (
-	"time"
-
-	"github.com/vinceprignano/SPGSolver/Go/graphs"
-	"github.com/vinceprignano/SPGSolver/Go/utils"
-)
+import "github.com/vinceprignano/SPGSolver/Go/graphs"
 
 // Solver interface defines only a Win function
 // that takes a graph as input and returns the solution
@@ -19,6 +14,5 @@ type Solver interface {
 // of the well known Strategy Pattern in Go
 func Solve(strategy Solver, graph *graphs.Graph) ([]int, []int) {
 	// Prints the time (in seconds) when the function returns
-	defer utils.TimeTrack(time.Now(), "Solved")
 	return strategy.Win(graph)
 }

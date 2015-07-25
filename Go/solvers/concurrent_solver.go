@@ -3,8 +3,10 @@ package solvers
 import (
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/vinceprignano/SPGSolver/Go/graphs"
+	"github.com/vinceprignano/SPGSolver/Go/utils"
 )
 
 type ConcurrentSolver struct{}
@@ -123,6 +125,7 @@ func (c *ConcurrentSolver) attr(G *graphs.Graph, removed []bool, A []int, i int)
 // Win is implemented by RecursiveImproved and returns
 // the solution for a given game in input
 func (c *ConcurrentSolver) Win(G *graphs.Graph) ([]int, []int) {
+	defer utils.TimeTrack(time.Now(), "Solved with Concurrent")
 	removed := make([]bool, len(G.Nodes))
 	res1, res2 := c.win(G, removed)
 	return res1, res2
