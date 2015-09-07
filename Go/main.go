@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"reflect"
 	"sort"
 
 	"github.com/vinceprignano/SPGSolver/Go/graphs"
@@ -13,7 +14,9 @@ import (
 func main() {
 
 	// Flags for command line
-	justHeatFlag := flag.Bool("justheat", false, "Pass this option to disable solution printing.")
+	justHeatFlag := flag.Bool("justHeat", false, "Pass this option to disable solution printing.")
+	concurrent := flag.Bool("concurrent", false, "Use the concurrent solver.")
+	bench := flag.Bool("bench", false, "Benchmark and test solutions across all solvers.")
 	help := flag.Bool("help", false, "Prints this help screen.")
 	flag.Parse()
 
@@ -28,12 +31,25 @@ func main() {
 	// way using the file that respets the PGSolver's format
 	G := graphs.NewGraphFromPGSolverFile()
 
+	if *bench {
+		for _, s := range []solvers.Solver{&solvers.RecursiveImproved{}, &solvers.ConcurrentSolver{}} {
+			fmt.Printf("\n")
+			fmt.Printf("--- SOLVER %s ---\n", reflect.ValueOf(s).Elem().Type().Name())
+			solvers.Solve(s, G)
+		}
+		return
+	}
+
 	// Declaring two solutions slices of integers
 	var solution0, solution1 []int
 
 	// Starting solving process, using Recursive Improved as default method
 	// Solving the game using the Recursive Improved Algorithm
-	solution0, solution1 = solvers.Solve(solvers.RecursiveImproved{}, G)
+	if *concurrent {
+		solution0, solution1 = solvers.Solve(&solvers.ConcurrentSolver{}, G)
+	} else {
+		solution0, solution1 = solvers.Solve(&solvers.RecursiveImproved{}, G)
+	}
 
 	if !*justHeatFlag {
 		// Sorting the solutions

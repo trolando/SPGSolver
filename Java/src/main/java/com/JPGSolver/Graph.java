@@ -119,8 +119,8 @@ public class Graph {
         System.out.println("Parsing Graph from .............. " + file);
         Graph graph = null;
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            Optional<String> first = br.lines().findFirst();
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            Optional<String> first = bufferedReader.lines().findFirst();
             if (first.isPresent()) {
                 String[] ln = first.get().split(" ");
                 graph = new Graph(Integer.parseInt(ln[1].substring(0, ln[1].length() - 1)) + 1);
@@ -129,7 +129,7 @@ public class Graph {
             }
 
             final Graph G = graph;
-            br.lines().parallel().forEach(line -> {
+            bufferedReader.lines().parallel().forEach(line -> {
                 String[] x = line.split(" ");
                 String[] edges = x[3].split(",");
                 int node = Integer.parseInt(x[0]);

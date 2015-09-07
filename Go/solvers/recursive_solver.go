@@ -1,27 +1,32 @@
 package solvers
 
-import "github.com/vinceprignano/SPGSolver/Go/graphs"
+import (
+	"time"
+
+	"github.com/vinceprignano/SPGSolver/Go/graphs"
+	"github.com/vinceprignano/SPGSolver/Go/utils"
+)
 
 type RecursiveImproved struct{}
 
 // attr is the attractor function used by 'win'
-func attr(G *graphs.Graph, removed []bool, A []int, i int) []int {
-	tmpMap := make([]int, len(G.Nodes()))
+func (r *RecursiveImproved) attr(G *graphs.Graph, removed []bool, A []int, i int) []int {
+	tmpMap := make([]int, len(G.Nodes))
 	for _, x := range A {
 		tmpMap[x] = 1
 	}
 	index := 0
 	for {
-		for _, v0 := range G.Nodes()[A[index]].Inj() {
+		for _, v0 := range G.Nodes[A[index]].Inc {
 			if !removed[v0] {
-				flag := G.Nodes()[v0].Player() == i
+				flag := G.Nodes[v0].Player == i
 				if tmpMap[v0] == 0 {
 					if flag {
 						A = append(A, v0)
 						tmpMap[v0] = 1
 					} else {
 						adj_counter := 0
-						for _, x := range G.Nodes()[v0].Adj() {
+						for _, x := range G.Nodes[v0].Adj {
 							if !removed[x] {
 								adj_counter += 1
 							}
@@ -48,12 +53,12 @@ func attr(G *graphs.Graph, removed []bool, A []int, i int) []int {
 }
 
 // win is the main function in Improved Zielonka's Recursive Algorithm
-func win(G *graphs.Graph, removed []bool) ([]int, []int) {
+func (r *RecursiveImproved) win(G *graphs.Graph, removed []bool) ([]int, []int) {
 	var W [2][]int
 	d := G.MaxPriority(removed)
 	if d > -1 {
 		U := []int{}
-		for _, v := range G.Priorities()[d] {
+		for _, v := range G.PriorityMap[d] {
 			if !removed[v] {
 				U = append(U, v)
 			}
@@ -61,23 +66,23 @@ func win(G *graphs.Graph, removed []bool) ([]int, []int) {
 		p := d % 2
 		j := 1 - p
 		var W1 [2][]int
-		A := attr(G, removed, U, p)
+		A := r.attr(G, removed, U, p)
 		removed1 := make([]bool, len(removed))
 		copy(removed1, removed)
 		for _, x := range A {
 			removed1[x] = true
 		}
-		W1[0], W1[1] = win(G, removed1)
+		W1[0], W1[1] = r.win(G, removed1)
 		if len(W1[j]) == 0 {
 			W[p] = append(W1[p], A...)
 		} else {
-			B := attr(G, removed, W1[j], j)
+			B := r.attr(G, removed, W1[j], j)
 			removed2 := make([]bool, len(removed))
 			copy(removed2, removed)
 			for _, x := range B {
 				removed2[x] = true
 			}
-			W1[0], W1[1] = win(G, removed2)
+			W1[0], W1[1] = r.win(G, removed2)
 			W[p] = W1[p]
 			W[j] = append(W1[j], B...)
 		}
@@ -87,8 +92,9 @@ func win(G *graphs.Graph, removed []bool) ([]int, []int) {
 
 // Win is implemented by RecursiveImproved and returns
 // the solution for a given game in input
-func (r RecursiveImproved) Win(G *graphs.Graph) ([]int, []int) {
-	removed := make([]bool, len(G.Nodes()))
-	res1, res2 := win(G, removed)
+func (r *RecursiveImproved) Win(G *graphs.Graph) ([]int, []int) {
+	defer utils.TimeTrack(time.Now(), "Solve with Recursive")
+	removed := make([]bool, len(G.Nodes))
+	res1, res2 := r.win(G, removed)
 	return res1, res2
 }
