@@ -1,5 +1,7 @@
 package com.JPGSolver;
 
+import com.JPGSolver.Graph.Node;
+
 import com.google.common.primitives.Ints;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
@@ -31,8 +33,86 @@ public class AsyncSolver implements Solver {
         this.check = new int[G.length()];
         BitSet removed = new BitSet(G.length());
         int[][] res =  win_improved(removed);
+        //int[][] res =  pre_improved(removed);
+        //int[][] res = win_banal();
         executor.shutdown();
         return res;
+    }
+
+    protected class asyncBanal implements Callable<TIntArrayList[]> {
+
+        int nodeI;
+
+        public asyncBanal(int node){
+            this.nodeI = node;
+        }
+
+        private boolean maxPP(Node n1, Node n2, int player){
+            int priority = Integer.max(n1.getPriority(), n2.getPriority());
+            if (player == 0) return priority % 2 == 0;
+            else  return priority % 2 != 0;
+        }
+
+        public TIntArrayList[] call() {
+            if (tmpMap[nodeI] == 1)
+                return null;
+
+            TIntArrayList[] banal = new TIntArrayList[2];
+            banal[0] = new TIntArrayList();
+            banal[1] = new TIntArrayList();
+            Node node = G.info[nodeI];
+            int nodeP = node.getPlayer();
+            TIntIterator nextIt = node.getAdj().iterator();
+            while (nextIt.hasNext()){
+                int nextI = nextIt.next();
+                Node next = G.info[nextI];
+                int nextP = next.getPlayer();
+                if (nodeP == nextP && maxPP(node, next, nodeP) && next.getAdj().contains(nodeI)){
+                    if (tmpMap[nodeI] != 1){
+                        tmpMap[nodeI] = 1;
+                        banal[nodeP].add(nodeI);
+                    }
+                    if (tmpMap[nextI] != 1){
+                        tmpMap[nextI] = 1;
+                        banal[nextP].add(nextI);
+                    }
+
+                }
+            }
+            return banal;
+        }
+    }
+
+    public int[][] win_banal(){
+        TIntArrayList[] banal = new TIntArrayList[2];
+        banal[0] = new TIntArrayList();
+        banal[1] = new TIntArrayList();
+
+        ArrayList<FutureTask<TIntArrayList[]>> tasks = new ArrayList<>();
+
+        for (int node = 0; node < G.length(); node++){
+            FutureTask<TIntArrayList[]> task = new FutureTask<>(new asyncBanal(node));
+            tasks.add(task);
+            executor.execute(task);
+        }
+
+        try {
+            //for (FutureTask<TIntArrayList[]> task : tasks) executor.execute(task);
+            for (FutureTask<TIntArrayList[]> task : tasks){
+                TIntArrayList[] get = task.get();
+                if (get == null) continue;
+                MyTrove.addAllEx(banal[0], get[0], check);
+                MyTrove.addAllEx(banal[1], get[1], check);
+            }
+            tasks.clear();
+        } catch (Exception e) {
+            executor.shutdown();
+            throw new RuntimeException("Future get Exception");
+        }
+
+        System.out.println("Banals: " + (banal[0].size() + banal[1].size()));
+        int[][] W = {banal[0].toArray(), banal[1].toArray()};
+        return W;
     }
 
     protected class asyncAttr implements Callable<TIntArrayList> {
@@ -110,6 +190,7 @@ public class AsyncSolver implements Solver {
             try {
                 for (FutureTask<TIntArrayList> task : tasks) executor.execute(task);
                 for (FutureTask<TIntArrayList> task : tasks) MyTrove.addAllEx(A, task.get(), check);
+                tasks.clear();
             } catch (Exception e) {
                 executor.shutdown();
                 throw new RuntimeException("Future get Exception");
@@ -120,6 +201,28 @@ public class AsyncSolver implements Solver {
             removed.set(it.next());
         }
         return A;
+    }
+
+    private int[][] pre_improved(BitSet removed) {
+        final int[][] W = {new int[0], new int[0]};
+        final int d = G.maxPriority(removed);
+        if (d > -1) {
+            TIntArrayList U = G.getNodesWithPriority(d, removed);
+            final int p = d % 2;
+            final int j = 1 - p;
+            int[][] W1;
+            W1 = win_banal();
+            if (W1[j].length == 0) {
+                W[p] = W1[p];
+            } else {
+                BitSet removed2 = (BitSet)removed.clone();
+                final TIntArrayList B = Attr(new TIntArrayList(W1[j]), j, removed2);
+                W1 = win_improved(removed2);
+                W[p] = W1[p];
+                W[j] = Ints.concat(W1[j], B.toArray());
+            }
+        }
+        return W;
     }
 
     private int[][] win_improved(BitSet removed) {

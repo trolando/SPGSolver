@@ -1,5 +1,6 @@
 package com.JPGSolver;
 
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
 
 import java.io.*;
@@ -65,6 +66,7 @@ public class Graph {
                 return "[" + String.format("%02d", priority) + "]";
             }
         }
+
     }
 
     public final Node[] info;
@@ -129,7 +131,7 @@ public class Graph {
             }
 
             final Graph G = graph;
-            br.lines().parallel().forEach(line -> {
+            br.lines().forEach(line -> {
                 String[] x = line.split(" ");
                 String[] edges = x[3].split(",");
                 int node = Integer.parseInt(x[0]);
@@ -200,4 +202,5 @@ public class Graph {
         }
         return out;
     }
+
 }
