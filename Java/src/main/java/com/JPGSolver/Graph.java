@@ -10,11 +10,16 @@ import java.util.stream.Stream;
 
 public class Graph {
     public static class Node {
+        public final Object lock;
         private int index = -1;
         private int player = -1;
         private int priority = -1;
         private final TIntArrayList adj = new TIntArrayList();
         private final TIntArrayList inj = new TIntArrayList();
+
+        public Node(){
+            lock = new Object();
+        }
 
 
         public int getIndex() {

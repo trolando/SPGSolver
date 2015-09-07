@@ -23,7 +23,10 @@ public class AsyncSolver implements Solver {
     protected ExecutorService executor;
 
     public AsyncSolver(){
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        int processors = Runtime.getRuntime().availableProcessors();
+        //processors = 1;
+        System.out.println("Processors: " + processors);
+        executor = Executors.newFixedThreadPool(processors);
     }
 
     @Override
@@ -35,8 +38,15 @@ public class AsyncSolver implements Solver {
         int[][] res =  win_improved(removed);
         //int[][] res =  pre_improved(removed);
         //int[][] res = win_banal();
+        //int[][] res = win_banal_async();
         executor.shutdown();
         return res;
+    }
+
+
+    public static boolean checkBanal(Node node, Node next){
+        int nodeP = node.getPlayer();
+        return nodeP == next.getPlayer() && Integer.max(node.getPriority(), next.getPriority()) % 2 == nodeP && next.getAdj().contains(node.getIndex());
     }
 
     protected class asyncBanal implements Callable<TIntArrayList[]> {
@@ -56,10 +66,10 @@ public class AsyncSolver implements Solver {
         public TIntArrayList[] call() {
             if (tmpMap[nodeI] == 1)
                 return null;
-
             TIntArrayList[] banal = new TIntArrayList[2];
             banal[0] = new TIntArrayList();
             banal[1] = new TIntArrayList();
+
             Node node = G.info[nodeI];
             int nodeP = node.getPlayer();
             TIntIterator nextIt = node.getAdj().iterator();
@@ -67,7 +77,7 @@ public class AsyncSolver implements Solver {
                 int nextI = nextIt.next();
                 Node next = G.info[nextI];
                 int nextP = next.getPlayer();
-                if (nodeP == nextP && maxPP(node, next, nodeP) && next.getAdj().contains(nodeI)){
+                if (checkBanal(node, next)){
                     if (tmpMap[nodeI] != 1){
                         tmpMap[nodeI] = 1;
                         banal[nodeP].add(nodeI);
@@ -76,14 +86,14 @@ public class AsyncSolver implements Solver {
                         tmpMap[nextI] = 1;
                         banal[nextP].add(nextI);
                     }
-
                 }
             }
+
             return banal;
         }
     }
 
-    public int[][] win_banal(){
+    public int[][] win_banal_async(){
         TIntArrayList[] banal = new TIntArrayList[2];
         banal[0] = new TIntArrayList();
         banal[1] = new TIntArrayList();
@@ -110,6 +120,38 @@ public class AsyncSolver implements Solver {
             throw new RuntimeException("Future get Exception");
         }
 
+        System.out.println("Banals: " + (banal[0].size() + banal[1].size()));
+        int[][] W = {banal[0].toArray(), banal[1].toArray()};
+        return W;
+    }
+
+    public int[][] win_banal(){
+        TIntArrayList[] banal = new TIntArrayList[2];
+        banal[0] = new TIntArrayList();
+        banal[1] = new TIntArrayList();
+
+        for (int nodeI = 0; nodeI < G.length(); nodeI++){
+            if (tmpMap[nodeI] == 1)
+                continue;
+            Node node = G.info[nodeI];
+            int nodeP = node.getPlayer();
+            TIntIterator nextIt = node.getAdj().iterator();
+            while (nextIt.hasNext()){
+                int nextI = nextIt.next();
+                Node next = G.info[nextI];
+                int nextP = next.getPlayer();
+                if (checkBanal(node, next)){
+                    if (tmpMap[nodeI] != 1){
+                        tmpMap[nodeI] = 1;
+                        banal[nodeP].add(nodeI);
+                    }
+                    if (tmpMap[nextI] != 1){
+                        tmpMap[nextI] = 1;
+                        banal[nextP].add(nextI);
+                    }
+                }
+            }
+        }
         System.out.println("Banals: " + (banal[0].size() + banal[1].size()));
         int[][] W = {banal[0].toArray(), banal[1].toArray()};
         return W;
