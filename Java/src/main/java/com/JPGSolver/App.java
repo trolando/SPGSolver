@@ -12,6 +12,40 @@ public class App {
         CommandLineArgs cli = new CommandLineArgs();
         new JCommander(cli, args);
 
+        for (String file : cli.files){
+            //Stopwatch sw1 = Stopwatch.createStarted();
+            Graph G = Graph.initFromFile(file);
+            //sw1.stop();
+            //System.out.println("Parsed in " + sw1);
+            //Solver solver = cli.parallel ? new AsyncSolver() : cli.iterative ?new IterativeSolver() : new RecursiveSolver();
+            //AsyncSolver solver = new AsyncSolver();
+            AsyncSolver3 solver = new AsyncSolver3();
+            //RecursiveSolver solver = new RecursiveSolver();
+            Stopwatch sw2 = Stopwatch.createStarted();
+            int[][] solution = solver.win(G);
+            sw2.stop();
+
+            //Solver solver2 = new RecursiveSolver();
+            //int[][] solution2 = solver2.win(G);
+            //System.out.println(file + " " + sw2 + " " + checkSolution(solution, solution2));
+
+            //System.out.println(file + " " + sw2); //System.out.println("Solved in " + sw2);
+            System.out.println(file + " " + solver.sw + " " + sw2); //System.out.println("Solved in " + sw2);
+            //System.out.println(file + " " + solver.sw);
+
+            if (cli.justHeat) {
+                continue;
+            }
+            Arrays.sort(solution[0]);
+            Arrays.sort(solution[1]);
+            printSolution(solution);
+        }
+    }
+
+    public static void cleanMain( String[] args ) {
+        CommandLineArgs cli = new CommandLineArgs();
+        new JCommander(cli, args);
+
         Stopwatch sw1 = Stopwatch.createStarted();
         Graph G = Graph.initFromFile(cli.files.get(0));
         sw1.stop();
