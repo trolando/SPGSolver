@@ -8,10 +8,7 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 
@@ -21,12 +18,33 @@ public class AsyncSolver3 implements Solver {
     protected AtomicIntegerArray tmpMap;
     protected int[] check;
     protected ExecutorService executor;
+    protected int cores;
 
+    public Stopwatch swAttr;
+    public Stopwatch swTot;
     public Stopwatch sw;
 
+    public AsyncSolver3(int cores){
+        setCores(cores);
+        swAttr = Stopwatch.createUnstarted();
+        swTot = Stopwatch.createUnstarted();
+    }
+
     public AsyncSolver3(){
-        executor = Executors.newFixedThreadPool(8);
-        sw = Stopwatch.createUnstarted();
+        this(Runtime.getRuntime().availableProcessors());
+    }
+
+    public void setCores(int cores){
+        this.cores = cores;
+        if (executor != null){
+            executor.shutdown();
+            try {
+                executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
+            } catch (InterruptedException e){
+                throw new RuntimeException("Executor Interrupted");
+            }
+        }
+        executor = Executors.newFixedThreadPool(cores);
     }
 
     @Override
@@ -35,7 +53,15 @@ public class AsyncSolver3 implements Solver {
         this.tmpMap = new AtomicIntegerArray(G.length());
         this.check = new int[G.length()];
         BitSet removed = new BitSet(G.length());
+        this.swTot.reset();
+        this.swAttr.reset();
+        this.swTot.start();
         int[][] res =  win_improved(removed);
+        this.swTot.stop();
+        this.G = null;
+        this.tmpMap = null;
+        this.check = null;
+        removed = null;
         executor.shutdown();
         return res;
     }
@@ -100,7 +126,7 @@ public class AsyncSolver3 implements Solver {
 
         int index = 0;
         ArrayList<FutureTask<TIntArrayList>> tasks = new ArrayList<>();
-        sw.start();
+        swAttr.start();
         while (index < A.size()) {
             while (index < A.size()) {
                 tasks.add(new FutureTask<>(new asyncAttr(A.get(index), removed, i)));
@@ -116,7 +142,7 @@ public class AsyncSolver3 implements Solver {
             }
             tasks = new ArrayList<>();
         }
-        sw.stop();
+        swAttr.stop();
         it = A.iterator();
         while (it.hasNext()) {
             removed.set(it.next());

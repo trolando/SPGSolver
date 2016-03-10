@@ -3,14 +3,111 @@ package com.JPGSolver;
 import com.beust.jcommander.JCommander;
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
+import au.com.bytecode.opencsv.CSVWriter;
 
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class App {
+
+    public static void runTests(AsyncSolver3 solver, int cores, int min, int max, int step, int tries, String path, String generator){
+        String csv = path + "results.csv";
+        CSVWriter writer;
+        try {
+           writer = new CSVWriter(new FileWriter(csv));
+        } catch(IOException e){
+            throw new RuntimeException("File exists but is a directory rather than a regular file");
+        }
+
+        RecursiveSolver seq = new RecursiveSolver();
+
+        int colunms = 1 + 1 + cores;
+        List<String[]> dataAttr = new ArrayList<>();
+        List<String[]> dataTot = new ArrayList<>();
+        String[] row =  new String[colunms];
+        row [0] = "Attractor Time";
+        row [1] = "Seq";
+        for (int i = 2; i < cores + 2; i++){
+            row[i] = Integer.toString(i-1);
+        }
+        dataAttr.add(row);
+        dataTot.add(new String[cores]);
+        row = Arrays.copyOf(row, colunms);
+        row [0] = "Total Time";
+        dataTot.add(row);
+
+        try {
+            int cur = min;
+            for (cur = min; cur <= max; cur += step) {
+                for (int t = 1; t <= tries; t++) {
+                    String[] rowTot = new String[colunms];
+                    String[] rowAttr = new String[colunms];
+                    rowTot[0] = Integer.toString(cur) + "-" + Integer.toString(t);
+                    rowAttr[0] = rowTot[0];
+
+                    File f = new File(path + rowTot[0]);
+                    if (!f.exists()){
+                        //home/pgsolver/bin/randomgame 20000 20000 1 20000 >> 20000-2
+                        try {
+                            f.createNewFile();
+                            String sCur = Integer.toString(cur);
+                            Process p = new ProcessBuilder(generator, sCur, sCur, "1",sCur).redirectOutput(f).start();
+                            System.out.println("Generating Graph ................ " + f);
+                            p.waitFor();
+                        } catch (Exception e){
+                            throw new RuntimeException("randomgame Exception");
+                        }
+                    }
+
+                    Graph G = Graph.initFromFile(path + rowTot[0]);
+
+                    System.out.println("Testing ......................... " + f);
+                    //System.out.print("Seq");
+                    seq.win(G);
+                    rowTot[1] = swSecondify(seq.swTot.toString());
+                    rowAttr[1] = swSecondify(seq.swAttr.toString());
+                    for (int i = 1; i <= cores; i++) {
+                        int y = i + 1;
+                        //System.out.print(" " + i);
+                        solver.setCores(i);
+                        solver.win(G);
+                        rowTot[y] = swSecondify(solver.swTot.toString());
+                        rowAttr[y] = swSecondify(solver.swAttr.toString());
+                    }
+                    //System.out.print(" Done\n");
+                    dataAttr.add(rowAttr);
+                    dataTot.add(rowTot);
+                    G = null;
+                    System.gc();
+                }
+            }
+        }
+        catch(OutOfMemoryError e){
+            System.out.println("OOM!");
+        } finally {
+            writer.writeAll(dataAttr);
+            writer.writeAll(dataTot);
+            try {
+                writer.close();
+            } catch(IOException e){
+                throw new RuntimeException(" I/O error occurs");
+            }
+        }
+        System.out.println("Done");
+    }
 
     public static void main( String[] args ) {
         CommandLineArgs cli = new CommandLineArgs();
         new JCommander(cli, args);
+
+        if (cli.tests){
+            runTests(new AsyncSolver3(), 8, 22000, 24000, 2000, 3, "/home/umberto/Grafi/", "/home/umberto/pgsolver/bin/randomgame");
+            return;
+        }
+
+        ///home/umberto/Grafi/25000-3 -parallel -justHeat
 
         for (String file : cli.files){
             //Stopwatch sw1 = Stopwatch.createStarted();
@@ -70,6 +167,17 @@ public class App {
 
         printSolution(solution);
     }
+
+    public static String swSecondify(String s){
+        String[] strings = s.split(" ");
+        if (strings[1].compareTo("ms") == 0){
+            return Double.toString(Double.parseDouble(strings[0]) / 1000);
+        } else if (strings[1].compareTo("s") == 0){
+            return Double.toString(Double.parseDouble(strings[0]));
+        }
+        return s;
+    }
+
 
     public static void printSolution(int[][] solution){
         System.out.print("\nSolution for player 0:\n{");

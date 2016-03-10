@@ -33,4 +33,7 @@ public class CommandLineArgs {
 
     @Parameter(names = "-iterative", description = "Explicited Stack")
     public boolean iterative = false;
+
+    @Parameter(names = "-tests", description = "Explicited Stack")
+    public boolean tests = false;
 }
