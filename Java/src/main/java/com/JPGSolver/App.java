@@ -65,14 +65,14 @@ public class App {
 
                     System.out.println("Testing ......................... " + f);
                     //System.out.print("Seq");
-                    seq.win(G);
+                    int[][] res = seq.win(G);
                     rowTot[1] = swSecondify(seq.swTot.toString());
                     rowAttr[1] = swSecondify(seq.swAttr.toString());
                     for (int i = 1; i <= cores; i++) {
                         int y = i + 1;
                         //System.out.print(" " + i);
                         solver.setCores(i);
-                        solver.win(G);
+                        if (!checkSolution(res, solver.win(G))) throw new RuntimeException("Incorrect Result!");
                         rowTot[y] = swSecondify(solver.swTot.toString());
                         rowAttr[y] = swSecondify(solver.swAttr.toString());
                     }
@@ -103,7 +103,7 @@ public class App {
         new JCommander(cli, args);
 
         if (cli.tests){
-            runTests(new AsyncSolver3(), 8, 22000, 24000, 2000, 3, "/home/umberto/Grafi/", "/home/umberto/pgsolver/bin/randomgame");
+            runTests(new AsyncSolver3(), 8, 2000, 10000, 2000, 3, "/home/umberto/Grafi/", "/home/umberto/pgsolver/bin/randomgame");
             return;
         }
 
