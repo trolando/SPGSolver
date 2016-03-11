@@ -25,8 +25,8 @@ public class CommandLineArgs {
     @Parameter(names = "-justHeat", description = "Output time only")
     public boolean justHeat = false;
 
-    @Parameter(description = "Path to graph file")
-    public List<String> files = new ArrayList<String>();
+    @Parameter(description = "Parameters")
+    public List<String> params = new ArrayList<String>();
 
     @Parameter(names = "-parallel", description = "Parallelized Attractor")
     public boolean parallel = false;

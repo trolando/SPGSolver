@@ -103,13 +103,25 @@ public class App {
         new JCommander(cli, args);
 
         if (cli.tests){
-            runTests(new AsyncSolver3(), 8, 2000, 10000, 2000, 3, "/home/umberto/Grafi/", "/home/umberto/pgsolver/bin/randomgame");
+            if (cli.params.size() < 7) throw new RuntimeException("Missing Parameters");
+            List<String> par = cli.params;
+            int nthreads = Integer.parseInt(par.get(0));
+            int minG = Integer.parseInt(par.get(1));
+            int maxG = Integer.parseInt(par.get(2));
+            int stpG = Integer.parseInt(par.get(3));
+            int tries = Integer.parseInt(par.get(4));
+            String path = par.get(5);
+            if (!new File(path).isDirectory()) throw new RuntimeException("Need a working directory");
+            String gen = par.get(6);
+            if (!new File(gen).canExecute()) throw new RuntimeException("Need a game generator");
+            runTests(new AsyncSolver3(), nthreads, minG, maxG, stpG, tries, path, gen);
+            //runTests(new AsyncSolver3(), nthreads, minG, maxG, stpG, tries, "/home/umberto/Grafi/", "/home/umberto/pgsolver/bin/randomgame");
             return;
         }
 
         ///home/umberto/Grafi/25000-3 -parallel -justHeat
 
-        for (String file : cli.files){
+        for (String file : cli.params){
             //Stopwatch sw1 = Stopwatch.createStarted();
             Graph G = Graph.initFromFile(file);
             //sw1.stop();
@@ -144,7 +156,7 @@ public class App {
         new JCommander(cli, args);
 
         Stopwatch sw1 = Stopwatch.createStarted();
-        Graph G = Graph.initFromFile(cli.files.get(0));
+        Graph G = Graph.initFromFile(cli.params.get(0));
         sw1.stop();
         System.out.println("Parsed in " + sw1);
         Solver solver = cli.parallel ? new AsyncSolver() : cli.iterative ?new IterativeSolver() : new RecursiveSolver();
