@@ -13,19 +13,20 @@ import java.util.List;
 public class App {
 
     public static void runTests(AsyncSolver3 solver, int cores, int min, int max, int step, int tries, String path, String generator){
-        String csv = path + "results.csv";
-        CSVWriter writer;
-        try {
-           writer = new CSVWriter(new FileWriter(csv));
-        } catch(IOException e){
-            throw new RuntimeException("File exists but is a directory rather than a regular file");
-        }
 
-        RecursiveSolver seq = new RecursiveSolver();
-
-        int colunms = 1 + 1 + cores;
         List<String[]> dataAttr = new ArrayList<>();
         List<String[]> dataTot = new ArrayList<>();
+
+        Runtime.getRuntime().addShutdownHook(
+                new Thread("app-shutdown-hook") {
+                    @Override
+                    public void run() {
+                        System.out.println("External Termination");
+                        saveResults(path,dataAttr, dataTot);
+                    }
+                });
+
+        int colunms = 1 + 1 + cores;
         String[] row =  new String[colunms];
         row [0] = "Attractor Time";
         row [1] = "Seq";
@@ -40,6 +41,7 @@ public class App {
 
         try {
             int cur = min;
+            RecursiveSolver seq = new RecursiveSolver();
             for (cur = min; cur <= max; cur += step) {
                 for (int t = 1; t <= tries; t++) {
                     String[] rowTot = new String[colunms];
@@ -87,15 +89,28 @@ public class App {
         catch(OutOfMemoryError e){
             System.out.println("OOM!");
         } finally {
-            writer.writeAll(dataAttr);
-            writer.writeAll(dataTot);
-            try {
-                writer.close();
-            } catch(IOException e){
-                throw new RuntimeException(" I/O error occurs");
-            }
+            saveResults(path,dataAttr, dataTot);
         }
         System.out.println("Done");
+    }
+
+    public static void saveResults(String path, List<String[]> dataAttr, List<String[]> dataTot){
+        String csv = path + "results.csv";
+        int ind = 1;
+        while (new File(csv).exists()){
+            csv = path + "results" + ind + ".csv";
+            ind++;
+        }
+        System.out.println("Writing Results to " + csv);
+        CSVWriter writer;
+        try {
+            writer = new CSVWriter(new FileWriter(csv));
+            writer.writeAll(dataAttr);
+            writer.writeAll(dataTot);
+            writer.close();
+        } catch(IOException e){
+            throw new RuntimeException(" I/O error occurs");
+        }
     }
 
     public static void main( String[] args ) {
