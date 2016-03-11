@@ -18,13 +18,13 @@ public class App {
         List<String[]> dataTot = new ArrayList<>();
 
         Runtime.getRuntime().addShutdownHook(
-                new Thread("app-shutdown-hook") {
-                    @Override
-                    public void run() {
-                        System.out.println("External Termination");
-                        saveResults(path,dataAttr, dataTot);
-                    }
-                });
+            new Thread("app-shutdown-hook") {
+                @Override
+                public void run() {
+                    System.out.println("External Termination");
+                    saveResults(path,dataAttr, dataTot);
+                }
+            });
 
         int colunms = 1 + 1 + cores;
         String[] row =  new String[colunms];
@@ -126,37 +126,22 @@ public class App {
             int stpG = Integer.parseInt(par.get(3));
             int tries = Integer.parseInt(par.get(4));
             String path = par.get(5);
-            if (!new File(path).isDirectory()) throw new RuntimeException("Need a working directory");
             String gen = par.get(6);
+            if (!new File(path).isDirectory()) throw new RuntimeException("Need a working directory");
             if (!new File(gen).canExecute()) throw new RuntimeException("Need a game generator");
             runTests(new AsyncSolver3(), nthreads, minG, maxG, stpG, tries, path, gen);
             //runTests(new AsyncSolver3(), nthreads, minG, maxG, stpG, tries, "/home/umberto/Grafi/", "/home/umberto/pgsolver/bin/randomgame");
             return;
         }
 
-        ///home/umberto/Grafi/25000-3 -parallel -justHeat
 
         for (String file : cli.params){
-            //Stopwatch sw1 = Stopwatch.createStarted();
             Graph G = Graph.initFromFile(file);
-            //sw1.stop();
-            //System.out.println("Parsed in " + sw1);
-            //Solver solver = cli.parallel ? new AsyncSolver() : cli.iterative ?new IterativeSolver() : new RecursiveSolver();
-            //AsyncSolver solver = new AsyncSolver();
             AsyncSolver3 solver = new AsyncSolver3();
-            //RecursiveSolver solver = new RecursiveSolver();
             Stopwatch sw2 = Stopwatch.createStarted();
             int[][] solution = solver.win(G);
             sw2.stop();
-
-            //Solver solver2 = new RecursiveSolver();
-            //int[][] solution2 = solver2.win(G);
-            //System.out.println(file + " " + sw2 + " " + checkSolution(solution, solution2));
-
-            //System.out.println(file + " " + sw2); //System.out.println("Solved in " + sw2);
-            System.out.println(file + " " + solver.sw + " " + sw2); //System.out.println("Solved in " + sw2);
-            //System.out.println(file + " " + solver.sw);
-
+            System.out.println(file + " " + solver.sw + " " + sw2);
             if (cli.justHeat) {
                 continue;
             }
