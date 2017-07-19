@@ -123,7 +123,7 @@ public class Graph {
             Optional<String> first = bufferedReader.lines().findFirst();
             if (first.isPresent()) {
                 String[] ln = first.get().split(" ");
-                graph = new Graph(Integer.parseInt(ln[1].substring(0, ln[1].length() - 1)) + 1);
+                graph = new Graph(Integer.parseInt(ln[1].substring(0, ln[1].length() - 1)));
             } else {
                 throw new RuntimeException("Invalid file passed as arena.");
             }
