@@ -3,7 +3,7 @@ package com.JPGSolver;
 import com.beust.jcommander.JCommander;
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
-import au.com.bytecode.opencsv.CSVWriter;
+import com.opencsv.CSVWriter;
 
 import java.io.*;
 import java.util.ArrayList;
