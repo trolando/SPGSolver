@@ -8,6 +8,15 @@ Requirements
 - C++11
 - Boost Library
 
+Compiling SPGSolver
+---------
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
 Running SPGSolver
 ---------
 After compiling with `g++` or `clang`.
