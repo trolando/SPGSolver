@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <sstream>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/program_options.hpp>
@@ -46,14 +47,10 @@ public:
         return inj;
     }
     void add_adj(int other) {
-        mutex.lock();
         adj.push_back(other);
-        mutex.unlock();
     }
     void add_inj(int other) {
-        mutex.lock();
         inj.push_back(other);
-        mutex.unlock();
     }
 };
 
@@ -292,46 +289,49 @@ win(Graph& G, std::function<std::array<std::vector<int>, 2>(Graph& G, std::vecto
     return res;
 }
 
-void add_node_string(Graph *G, std::string line, std::mutex *gLock) {
-    std::vector<std::string> x, edges;
-    boost::split(x, line, boost::is_any_of(" "));
-    int node = std::atoi(x[0].c_str());
-    gLock->lock();
-    G->addNode(node, std::atoi(x[1].c_str()), std::atoi(x[2].c_str()));
-    gLock->unlock();
-    boost::split(edges, x[3], boost::is_any_of(","));
-    for (const auto& x : edges) {
-        G->addEdge(node, atoi(x.c_str()));
-    }
-    
-}
-
-Graph
+Graph*
 init_graph_from_file(std::string argf) {
+    // record current time
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
+    // get ifstream for file
     std::ifstream ifs(argf);
+    // read header line...
     std::string line;
-    std::string first;
-    std::getline(ifs, first);
     int numNodes = 0;
-    if (first.compare("parity") > -1) {
-        std::vector<std::string> y;
-        boost::split(y, first, boost::is_any_of(" "));
-        numNodes = atoi(y[1].substr(0, y[1].size()-1).c_str());
-    } else {
-        throw "Invalid file Passed as argument.";
+    while (getline(ifs, line)) {
+        std::stringstream ss(line);
+        std::string token;
+        if (!(ss>>token)) continue; // ignore empty lines
+        if (token != "parity") throw "Invalid file, expecting parity header!";
+        if (!(ss >> numNodes)) throw "Invalid file, missing number of nodes!";
+        break;
     }
-    Graph G(numNodes + 1);
-    std::mutex gLock;
-    std::vector<std::future<void>> results;
-    while (std::getline(ifs, line)) {
-        results.push_back(std::async(add_node_string, &G, std::string(line), &gLock));
+    Graph *G = new Graph(numNodes + 1);
+    // read spec...
+    while (getline(ifs, line)) {
+        std::stringstream ss(line);
+        std::string token;
+        int node, priority, owner;
+        try {
+            if (!(ss>>node)) continue; // ignore empty line
+        } catch (const std::invalid_argument) {
+            continue; // ignore lines starting with a non number
+        }
+        if (!(ss >> priority)) throw "missing priority";
+        if (!(ss >> owner)) throw "missing owner";
+        G->addNode(node, priority, owner);
+        for (;;) {
+            int to;
+            if (!(ss >> to)) throw "missing successor";
+            G->addEdge(node, to);
+            char ch;
+            if (!(ss >> ch)) throw "missing ; to end line";
+            if (ch == ',') continue; // next successor
+            break; // no next successor, ignore rest
+        }
     }
-    ifs.close();
-    for (int i = 0; i < results.size(); i++) {
-        results[i].wait();
-    }
+    // record time again and report how long it took
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
     std::cout << "Parsed in ........... " << elapsed_seconds.count() << "s" << std::endl;
@@ -375,9 +375,9 @@ main(int argc, const char * argv[]) {
     std::array<std::vector<int>, 2> solutions;
     
     if (variables_map["concurrent"].as<bool>()) {
-        solutions = win(G, win_concurrent);
+        solutions = win(*G, win_concurrent);
     } else {
-        solutions = win(G, win_improved);
+        solutions = win(*G, win_improved);
     }
     
     
@@ -406,5 +406,6 @@ main(int argc, const char * argv[]) {
         }
     }
     printf("\n");
+    delete G;
     return 0;
 }
